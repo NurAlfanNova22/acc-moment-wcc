@@ -665,6 +665,38 @@ export default function AdminDashboardPage() {
 
               <div className="flex gap-2">
                 <button
+                  onClick={() => {
+                    const name = prompt("Nama Klien?");
+                    if (!name) return;
+                    const date = prompt("Tanggal Acara (YYYY-MM-DD)?", new Date().toISOString().split("T")[0]);
+                    const pkg = prompt("Paket?", "Paket Gold");
+                    
+                    const code = `ACC-${date?.replace(/-/g, "") || "000"}-${Math.floor(100+Math.random()*900)}`;
+                    const pin = Math.floor(1000+Math.random()*9000).toString();
+                    
+                    const newBooking: Booking = {
+                      id: Date.now().toString(),
+                      code,
+                      clientName: name,
+                      date: date || "",
+                      package: pkg || "",
+                      status: "confirmed",
+                      paymentStatus: "dp",
+                      rawDriveLink: "",
+                      editedDriveLink: "",
+                      assignedTeam: [],
+                    };
+                    
+                    setBookings([newBooking, ...bookings]);
+                    alert(`Klien Berhasil Ditambahkan!\n\nKirim info ini ke klien:\nKode: ${code}\nPIN: ${pin}`);
+                  }}
+                  className="flex min-h-[44px] flex-1 items-center justify-center gap-1.5 rounded-lg bg-secondary px-3.5 py-2 text-xs font-semibold text-white shadow-sm sm:flex-initial"
+                >
+                  <Plus size={16} />
+                  <span>Tambah Klien DEAL</span>
+                </button>
+
+                <button
                   onClick={() => setShowExpenseForm(!showExpenseForm)}
                   className="flex min-h-[44px] flex-1 items-center justify-center gap-1.5 rounded-lg bg-primary px-3.5 py-2 text-xs font-semibold text-white shadow-sm sm:flex-initial"
                 >

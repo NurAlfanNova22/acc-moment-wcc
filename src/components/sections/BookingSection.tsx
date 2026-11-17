@@ -11,6 +11,7 @@ import {
   Send,
   Loader2,
   CheckCircle2,
+  MessageCircle,
 } from "lucide-react";
 
 const PACKAGES_OPTIONS = [
@@ -31,7 +32,7 @@ const EVENT_TYPES = [
   { value: "lainnya", label: "Acara Lainnya" },
 ];
 
-type FormState = "idle" | "submitting" | "success" | "error";
+type FormState = "idle" | "submitting" | "success";
 
 export default function BookingSection() {
   const [formState, setFormState] = useState<FormState>("idle");
@@ -50,12 +51,9 @@ export default function BookingSection() {
   const validate = () => {
     const newErrors: Record<string, string> = {};
     if (!formData.name.trim()) newErrors.name = "Nama lengkap wajib diisi";
-    if (!formData.phone.trim()) newErrors.phone = "Nomor WhatsApp aktif wajib diisi";
-    if (!formData.eventDate) newErrors.eventDate = "Pilih tanggal acara";
-    if (!formData.eventType) newErrors.eventType = "Pilih jenis acara";
-    if (!formData.eventLocation.trim())
-      newErrors.eventLocation = "Lokasi atau nama gedung wajib diisi";
-    if (!formData.package) newErrors.package = "Pilih paket yang diinginkan";
+    if (!formData.phone.trim()) newErrors.phone = "Nomor WhatsApp wajib diisi";
+    if (!formData.eventDate) newErrors.eventDate = "Pilih rencana tanggal acara";
+    if (!formData.package) newErrors.package = "Pilih paket yang ingin ditanyakan";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -71,19 +69,20 @@ export default function BookingSection() {
     const selectedEvent =
       EVENT_TYPES.find((t) => t.value === formData.eventType)?.label ?? "";
 
+    // Flow: Langsung ke WhatsApp tanpa simpan database dulu (Mencegah Spam DB)
     const message = encodeURIComponent(
-      `Halo ACC Moment! Saya ingin booking tanggal acara:\n\n` +
+      `Halo ACC Moment! Saya tertarik untuk konsultasi booking:\n\n` +
         `• Nama: ${formData.name}\n` +
         `• No. WA: ${formData.phone}\n` +
-        `• Tanggal: ${formData.eventDate}\n` +
-        `• Acara: ${selectedEvent}\n` +
-        `• Lokasi: ${formData.eventLocation}\n` +
-        `• Paket: ${selectedPackage}\n` +
+        `• Rencana Tanggal: ${formData.eventDate}\n` +
+        `• Jenis Acara: ${selectedEvent || "-"}\n` +
+        `• Lokasi: ${formData.eventLocation || "-"}\n` +
+        `• Paket yg Diminati: ${selectedPackage}\n` +
         `• Catatan: ${formData.notes || "-"}\n\n` +
-        `Mohon konfirmasi ketersediaan jadwal dan tata cara pembayaran DP. Terima kasih!`
+        `Apakah jadwal tersebut masih tersedia? Mohon info rinciannya ya min. Terima kasih!`
     );
 
-    await new Promise((r) => setTimeout(r, 600));
+    await new Promise((r) => setTimeout(r, 1000));
     window.open(`https://wa.me/6281234567890?text=${message}`, "_blank");
     setFormState("success");
   };
@@ -110,31 +109,20 @@ export default function BookingSection() {
         <div className="mx-auto max-w-lg px-4 text-center">
           <div className="rounded-2xl border border-secondary/40 bg-warm-white p-6 sm:p-8 shadow-sm">
             <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-secondary/20">
-              <CheckCircle2 size={30} className="text-secondary" aria-hidden="true" />
+              <MessageCircle size={30} className="text-secondary" aria-hidden="true" />
             </div>
             <h2 className="mt-4 font-heading text-2xl font-bold text-text-dark">
-              Data Berhasil Terkirim!
+              Permintaan Terkirim!
             </h2>
             <p className="mt-2 text-xs sm:text-sm text-text-medium leading-relaxed">
-              Pesan pemesanan sudah dialihkan ke WhatsApp Admin ACC Moment. Admin akan segera memverifikasi tanggal acaramu dan mengirimkan invoice DP.
+              Detail konsultasi Anda sudah diarahkan ke WhatsApp Admin. Kami akan membalas ketersediaan jadwal dan info lainnya di sana.
             </p>
             <button
               type="button"
-              onClick={() => {
-                setFormState("idle");
-                setFormData({
-                  name: "",
-                  phone: "",
-                  eventDate: "",
-                  eventType: "",
-                  eventLocation: "",
-                  package: "",
-                  notes: "",
-                });
-              }}
+              onClick={() => setFormState("idle")}
               className="mt-6 flex min-h-[46px] w-full items-center justify-center rounded-lg border border-border bg-cream px-5 py-2.5 text-xs sm:text-sm font-semibold text-text-dark transition-colors active:bg-primary-pale"
             >
-              Buat Pemesanan Lainnya
+              Kembali ke Formulir
             </button>
           </div>
         </div>
@@ -146,27 +134,25 @@ export default function BookingSection() {
     <section id="pesan" className="bg-cream py-14 sm:py-20">
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
         <div className="grid gap-8 md:grid-cols-5 md:items-start md:gap-12">
-          {/* Sisi Kiri: Petunjuk */}
           <div className="md:col-span-2">
             <p className="text-xs font-semibold tracking-wider text-secondary uppercase sm:text-sm">
-              Formulir Cepat
+              Konsultasi Gratis
             </p>
             <h2 className="mt-1.5 font-heading text-2xl font-bold text-text-dark sm:text-3xl md:text-4xl">
-              Booking Tanggalmu
+              Tanya Jadwal & Paket
             </h2>
             <p className="mt-2 text-xs sm:text-sm text-text-medium leading-relaxed">
-              Isi data acara di samping. Sistem akan otomatis memformat dan menghubungkan pesananmu langsung ke WhatsApp Admin kami.
+              Isi rencana acaramu di sini. Kami akan mengecek ketersediaan tim dan membantu memilihkan paket yang paling pas buat kamu.
             </p>
 
-            {/* Step Praktis */}
             <div className="mt-6 space-y-3.5">
               <div className="flex items-start gap-3 rounded-lg bg-warm-white p-3 border border-border">
                 <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-white">
                   1
                 </span>
                 <div>
-                  <p className="text-xs font-bold text-text-dark">Isi Detail Acara</p>
-                  <p className="text-[11px] text-text-medium">Pilih paket dan tanggal pernikahanmu</p>
+                  <p className="text-xs font-bold text-text-dark">Lengkapi Form</p>
+                  <p className="text-[11px] text-text-medium">Beri tahu kami detail rencana acaramu</p>
                 </div>
               </div>
               <div className="flex items-start gap-3 rounded-lg bg-warm-white p-3 border border-border">
@@ -174,8 +160,8 @@ export default function BookingSection() {
                   2
                 </span>
                 <div>
-                  <p className="text-xs font-bold text-text-dark">Terkirim ke WhatsApp</p>
-                  <p className="text-[11px] text-text-medium">Konfirmasi langsung bersama tim admin</p>
+                  <p className="text-xs font-bold text-text-dark">Konsultasi via WA</p>
+                  <p className="text-[11px] text-text-medium">Ngobrol langsung dengan admin kami</p>
                 </div>
               </div>
               <div className="flex items-start gap-3 rounded-lg bg-warm-white p-3 border border-border">
@@ -183,14 +169,13 @@ export default function BookingSection() {
                   3
                 </span>
                 <div>
-                  <p className="text-xs font-bold text-text-dark">Jadwal Terkunci Resmi</p>
-                  <p className="text-[11px] text-text-medium">Dapatkan Kode Booking & PIN portal klien</p>
+                  <p className="text-xs font-bold text-text-dark">Dapatkan Akses Portal</p>
+                  <p className="text-[11px] text-text-medium">Diberikan setelah deal / pembayaran DP</p>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Sisi Kanan: Form */}
           <div className="md:col-span-3">
             <form
               onSubmit={handleSubmit}
@@ -199,12 +184,8 @@ export default function BookingSection() {
             >
               <div className="space-y-4">
                 <div>
-                  <label
-                    htmlFor="name"
-                    className="mb-1 flex items-center gap-1.5 text-xs font-semibold text-text-dark"
-                  >
-                    <User size={14} aria-hidden="true" className="text-primary" />
-                    Nama Pasangan / Klien
+                  <label htmlFor="name" className="mb-1 flex items-center gap-1.5 text-xs font-semibold text-text-dark">
+                    <User size={14} className="text-primary" /> Nama Lengkap
                   </label>
                   <input
                     id="name"
@@ -213,22 +194,15 @@ export default function BookingSection() {
                     value={formData.name}
                     onChange={handleChange}
                     placeholder="Contoh: Sarah & Dimas"
-                    className={`min-h-[46px] w-full rounded-lg border bg-cream px-3.5 py-2.5 text-sm text-text-dark placeholder:text-xs placeholder:text-text-light focus:outline-none focus:ring-2 focus:ring-primary ${
+                    className={`min-h-[46px] w-full rounded-lg border bg-cream px-3.5 py-2.5 text-sm text-text-dark focus:outline-none focus:ring-2 focus:ring-primary ${
                       errors.name ? "border-red-400" : "border-border"
                     }`}
                   />
-                  {errors.name && (
-                    <p className="mt-1 text-xs text-red-500">{errors.name}</p>
-                  )}
                 </div>
 
                 <div>
-                  <label
-                    htmlFor="phone"
-                    className="mb-1 flex items-center gap-1.5 text-xs font-semibold text-text-dark"
-                  >
-                    <Phone size={14} aria-hidden="true" className="text-primary" />
-                    No. WhatsApp Aktif
+                  <label htmlFor="phone" className="mb-1 flex items-center gap-1.5 text-xs font-semibold text-text-dark">
+                    <Phone size={14} className="text-primary" /> No. WhatsApp
                   </label>
                   <input
                     id="phone"
@@ -236,24 +210,17 @@ export default function BookingSection() {
                     type="tel"
                     value={formData.phone}
                     onChange={handleChange}
-                    placeholder="Contoh: 081234567890"
-                    className={`min-h-[46px] w-full rounded-lg border bg-cream px-3.5 py-2.5 text-sm text-text-dark placeholder:text-xs placeholder:text-text-light focus:outline-none focus:ring-2 focus:ring-primary ${
+                    placeholder="0812..."
+                    className={`min-h-[46px] w-full rounded-lg border bg-cream px-3.5 py-2.5 text-sm text-text-dark focus:outline-none focus:ring-2 focus:ring-primary ${
                       errors.phone ? "border-red-400" : "border-border"
                     }`}
                   />
-                  {errors.phone && (
-                    <p className="mt-1 text-xs text-red-500">{errors.phone}</p>
-                  )}
                 </div>
 
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
-                    <label
-                      htmlFor="eventDate"
-                      className="mb-1 flex items-center gap-1.5 text-xs font-semibold text-text-dark"
-                    >
-                      <Calendar size={14} aria-hidden="true" className="text-primary" />
-                      Tanggal Acara
+                    <label htmlFor="eventDate" className="mb-1 flex items-center gap-1.5 text-xs font-semibold text-text-dark">
+                      <Calendar size={14} className="text-primary" /> Rencana Tanggal
                     </label>
                     <input
                       id="eventDate"
@@ -261,120 +228,39 @@ export default function BookingSection() {
                       type="date"
                       value={formData.eventDate}
                       onChange={handleChange}
-                      className={`min-h-[46px] w-full rounded-lg border bg-cream px-3.5 py-2.5 text-sm text-text-dark focus:outline-none focus:ring-2 focus:ring-primary ${
-                        errors.eventDate ? "border-red-400" : "border-border"
-                      }`}
+                      className="min-h-[46px] w-full rounded-lg border border-border bg-cream px-3.5 py-2.5 text-sm text-text-dark focus:outline-none focus:ring-2 focus:ring-primary"
                     />
-                    {errors.eventDate && (
-                      <p className="mt-1 text-xs text-red-500">
-                        {errors.eventDate}
-                      </p>
-                    )}
                   </div>
-
                   <div>
-                    <label
-                      htmlFor="eventType"
-                      className="mb-1 flex items-center gap-1.5 text-xs font-semibold text-text-dark"
-                    >
-                      <FileText size={14} aria-hidden="true" className="text-primary" />
-                      Jenis Acara
+                    <label htmlFor="package" className="mb-1 flex items-center gap-1.5 text-xs font-semibold text-text-dark">
+                      <Package size={14} className="text-primary" /> Paket Minat
                     </label>
                     <select
-                      id="eventType"
-                      name="eventType"
-                      value={formData.eventType}
+                      id="package"
+                      name="package"
+                      value={formData.package}
                       onChange={handleChange}
-                      className={`min-h-[46px] w-full rounded-lg border bg-cream px-3.5 py-2.5 text-sm text-text-dark focus:outline-none focus:ring-2 focus:ring-primary ${
-                        errors.eventType ? "border-red-400" : "border-border"
-                      }`}
+                      className="min-h-[46px] w-full rounded-lg border border-border bg-cream px-3.5 py-2.5 text-sm text-text-dark focus:outline-none focus:ring-2 focus:ring-primary"
                     >
-                      {EVENT_TYPES.map((type) => (
-                        <option key={type.value} value={type.value}>
-                          {type.label}
-                        </option>
+                      {PACKAGES_OPTIONS.map((pkg) => (
+                        <option key={pkg.value} value={pkg.value}>{pkg.label}</option>
                       ))}
                     </select>
-                    {errors.eventType && (
-                      <p className="mt-1 text-xs text-red-500">
-                        {errors.eventType}
-                      </p>
-                    )}
                   </div>
                 </div>
 
                 <div>
-                  <label
-                    htmlFor="eventLocation"
-                    className="mb-1 flex items-center gap-1.5 text-xs font-semibold text-text-dark"
-                  >
-                    <MapPin size={14} aria-hidden="true" className="text-primary" />
-                    Lokasi / Nama Gedung / Kecamatan
-                  </label>
-                  <input
-                    id="eventLocation"
-                    name="eventLocation"
-                    type="text"
-                    value={formData.eventLocation}
-                    onChange={handleChange}
-                    placeholder="Contoh: Gedung Barata / Kedungwaru, Tulungagung"
-                    className={`min-h-[46px] w-full rounded-lg border bg-cream px-3.5 py-2.5 text-sm text-text-dark placeholder:text-xs placeholder:text-text-light focus:outline-none focus:ring-2 focus:ring-primary ${
-                      errors.eventLocation ? "border-red-400" : "border-border"
-                    }`}
-                  />
-                  {errors.eventLocation && (
-                    <p className="mt-1 text-xs text-red-500">
-                      {errors.eventLocation}
-                    </p>
-                  )}
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="package"
-                    className="mb-1 flex items-center gap-1.5 text-xs font-semibold text-text-dark"
-                  >
-                    <Package size={14} aria-hidden="true" className="text-primary" />
-                    Pilihan Paket
-                  </label>
-                  <select
-                    id="package"
-                    name="package"
-                    value={formData.package}
-                    onChange={handleChange}
-                    className={`min-h-[46px] w-full rounded-lg border bg-cream px-3.5 py-2.5 text-sm text-text-dark focus:outline-none focus:ring-2 focus:ring-primary ${
-                      errors.package ? "border-red-400" : "border-border"
-                    }`}
-                  >
-                    {PACKAGES_OPTIONS.map((pkg) => (
-                      <option key={pkg.value} value={pkg.value}>
-                        {pkg.label}
-                      </option>
-                    ))}
-                  </select>
-                  {errors.package && (
-                    <p className="mt-1 text-xs text-red-500">
-                      {errors.package}
-                    </p>
-                  )}
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="notes"
-                    className="mb-1 flex items-center gap-1.5 text-xs font-semibold text-text-dark"
-                  >
-                    <FileText size={14} aria-hidden="true" className="text-primary" />
-                    Catatan Khusus <span className="text-[11px] font-normal text-text-light">(opsional)</span>
+                  <label htmlFor="notes" className="mb-1 flex items-center gap-1.5 text-xs font-semibold text-text-dark">
+                    <FileText size={14} className="text-primary" /> Catatan / Request
                   </label>
                   <textarea
                     id="notes"
                     name="notes"
                     value={formData.notes}
                     onChange={handleChange}
-                    rows={3}
-                    placeholder="Contoh: Ingin ada konsep video transisi outfit makeup, atau request lagu khusus..."
-                    className="w-full rounded-lg border border-border bg-cream px-3.5 py-2.5 text-sm text-text-dark placeholder:text-xs placeholder:text-text-light focus:outline-none focus:ring-2 focus:ring-primary"
+                    rows={2}
+                    placeholder="Tuliskan jika ada request khusus..."
+                    className="w-full rounded-lg border border-border bg-cream px-3.5 py-2.5 text-sm text-text-dark focus:outline-none focus:ring-2 focus:ring-primary"
                   />
                 </div>
               </div>
@@ -382,17 +268,13 @@ export default function BookingSection() {
               <button
                 type="submit"
                 disabled={formState === "submitting"}
-                className="mt-6 flex min-h-[50px] w-full items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3.5 text-sm font-semibold text-white shadow-md transition-all hover:bg-primary/90 active:scale-[0.99] disabled:opacity-60"
+                className="mt-6 flex min-h-[50px] w-full items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3.5 text-sm font-semibold text-white shadow-md transition-all active:scale-[0.98] disabled:opacity-60"
               >
                 {formState === "submitting" ? (
-                  <>
-                    <Loader2 size={18} className="animate-spin" aria-hidden="true" />
-                    Menghubungkan ke WhatsApp...
-                  </>
+                  <Loader2 size={18} className="animate-spin" />
                 ) : (
                   <>
-                    <Send size={18} aria-hidden="true" />
-                    Kirim Pemesanan via WhatsApp
+                    <Send size={18} /> Cek Jadwal via WhatsApp
                   </>
                 )}
               </button>
