@@ -1,19 +1,20 @@
 @import "tailwindcss";
 
 @theme inline {
-  --color-primary: #C4707A;
-  --color-primary-light: #E8B4B8;
-  --color-primary-pale: #FFF0F1;
-  --color-secondary: #8FA68E;
-  --color-cream: #FDF8F0;
-  --color-text-dark: #3D2C2E;
-  --color-text-medium: #6B5557;
-  --color-text-light: #9B8486;
-  --color-warm-white: #FFFAF8;
-  --color-border: #E8D5D7;
+  --color-primary: #C5A059;
+  --color-primary-light: #E5D5B0;
+  --color-primary-pale: #FDFBF0;
+  --color-secondary: #8C6239;
+  --color-cream: #FDFBF0;
+  --color-text-dark: #2A1E17;
+  --color-text-medium: #5D4F45;
+  --color-text-light: #8E7F75;
+  --color-warm-white: #FFFFFF;
+  --color-border: #D4C3A3;
 
   --font-heading: "Playfair Display", serif;
   --font-body: "DM Sans", sans-serif;
+  --font-cursive: "Great Vibes", cursive;
 }
 
 *,
@@ -29,7 +30,7 @@ html {
 body {
   font-family: var(--font-body);
   color: var(--color-text-dark);
-  background-color: var(--color-warm-white);
+  background-color: var(--color-cream);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -52,7 +53,7 @@ a, button, summary, select, label[for],
   }
 }
 
-/* Utility hide scrollbar untuk tab/filter horizontal di mobile */
+/* Utility hide scrollbar */
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
