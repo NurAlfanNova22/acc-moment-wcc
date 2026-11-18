@@ -35,7 +35,7 @@ export default function Navbar() {
             Moment
           </span>
           <span className="hidden sm:inline-block text-[8px] font-medium tracking-[0.2em] text-text-light uppercase mt-0.5">
-            Your personal content creator
+            WCC & All Event • Tulungagung, Blitar, Kediri & Trenggalek
           </span>
         </Link>
 

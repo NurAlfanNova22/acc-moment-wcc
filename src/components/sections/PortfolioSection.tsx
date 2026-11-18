@@ -63,7 +63,7 @@ export default function PortfolioSection() {
             Portofolio Konten Viral
           </h2>
           <p className="mx-auto mt-2 max-w-xl text-xs text-text-medium sm:text-sm md:text-base">
-            Hasil karya video format vertikal 9:16 untuk TikTok & Instagram Reels yang estetik, emosional, dan siap FYP.
+            Hasil karya video format vertikal 9:16 untuk TikTok & Instagram Reels yang estetik, emosional, dan siap FYP. Melayani area Tulungagung, Blitar, Kediri, Trenggalek & sekitarnya.
           </p>
         </div>
 

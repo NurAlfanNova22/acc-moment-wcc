@@ -19,10 +19,10 @@ export default function Footer() {
               ACC Moment
             </p>
             <p className="mt-1 text-sm text-text-light">
-              Wedding Content Creator & All Event
+              WCC & All Event
             </p>
             <p className="text-sm text-text-light">
-              Tulungagung dan sekitarnya
+              Tulungagung, Blitar, Kediri & Trenggalek
             </p>
           </div>
 

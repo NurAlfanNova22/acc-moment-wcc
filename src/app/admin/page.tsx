@@ -361,8 +361,41 @@ export default function AdminDashboardPage() {
 
         {/* Tab Jadwal & Tim */}
         {activeTab === "team" && (
-          <div className="space-y-4">
-            <h1 className="font-heading text-xl font-bold text-text-dark">Jadwal & Tim Kerja</h1>
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h1 className="font-heading text-xl font-bold text-text-dark">Jadwal & Tim Kerja</h1>
+              <div className="flex items-center gap-2 rounded-lg bg-cream border border-border px-3 py-1.5 text-[10px] font-bold uppercase text-text-medium">
+                <Calendar size={12} /> {new Date().toLocaleDateString("id-ID", { month: 'long', year: 'numeric' })}
+              </div>
+            </div>
+
+            {/* Simple Grid Calendar View */}
+            <div className="rounded-xl border border-border bg-warm-white p-4 shadow-sm">
+              <div className="mb-4 grid grid-cols-7 gap-1 text-center text-[10px] font-bold uppercase tracking-widest text-text-light">
+                {['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'].map(day => <div key={day}>{day}</div>)}
+              </div>
+              <div className="grid grid-cols-7 gap-1">
+                {/* Dummy calendar dates for current month (Nov 2026) */}
+                {Array.from({ length: 30 }, (_, i) => i + 1).map(day => {
+                  const hasEvent = day === 15 || day === 25;
+                  return (
+                    <div 
+                      key={day} 
+                      className={`relative flex h-14 flex-col items-center justify-center rounded-lg border border-border/40 text-xs font-bold transition-colors ${
+                        hasEvent ? 'bg-primary/10 border-primary/30 text-primary' : 'bg-cream/30 text-text-medium'
+                      }`}
+                    >
+                      <span>{day}</span>
+                      {hasEvent && <div className="absolute bottom-1.5 h-1 w-1 rounded-full bg-primary" />}
+                    </div>
+                  );
+                })}
+              </div>
+              <p className="mt-4 text-[9px] font-medium text-text-light uppercase tracking-widest italic text-center">
+                *Tanda titik menunjukkan adanya jadwal acara di tanggal tersebut.
+              </p>
+            </div>
+
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {bookings.map((b) => (
                 <div key={b.id} className="rounded-xl border border-border bg-warm-white p-4 shadow-sm">
@@ -372,12 +405,15 @@ export default function AdminDashboardPage() {
                   </div>
                   <h3 className="font-heading text-base font-bold text-text-dark">{b.clientName}</h3>
                   <div className="mt-4 pt-3 border-t border-border/40">
-                    <p className="text-[10px] font-bold text-text-light uppercase tracking-widest mb-2">Tim Bertugas:</p>
-                    <div className="flex flex-wrap gap-1.5">
+                    <p className="text-[10px] font-bold text-text-light uppercase tracking-widest mb-2 text-center bg-cream py-1 rounded">Tim Bertugas</p>
+                    <div className="flex flex-wrap justify-center gap-1.5 mt-2">
                       {b.assignedTeam.length > 0 ? b.assignedTeam.map((m, i) => (
-                        <span key={i} className="rounded-full bg-cream border border-border px-2.5 py-0.5 text-[10px] font-semibold text-text-dark">{m}</span>
+                        <span key={i} className="rounded-full bg-warm-white border border-border px-2.5 py-0.5 text-[9px] font-bold uppercase text-text-dark">{m}</span>
                       )) : <p className="text-[10px] italic text-red-400">Belum ada tim...</p>}
                     </div>
+                    <button className="mt-4 w-full rounded-lg border border-dashed border-primary/40 py-2 text-[9px] font-bold uppercase tracking-widest text-primary hover:bg-primary/5 transition-colors">
+                      + Plot Tim Baru
+                    </button>
                   </div>
                 </div>
               ))}

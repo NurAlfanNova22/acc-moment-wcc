@@ -10,7 +10,7 @@ export default function HeroSection() {
         <div className="order-1">
           <div className="inline-flex items-center gap-1.5 rounded-full bg-secondary/15 px-3 py-1 text-xs font-semibold tracking-wide text-secondary uppercase">
             <Sparkles size={13} aria-hidden="true" />
-            <span>Wedding Content Creator Tulungagung</span>
+            <span>WCC & All Event • Tulungagung, Blitar, Kediri & Trenggalek</span>
           </div>
 
           <h1 className="mt-3 font-heading text-3xl font-bold leading-tight text-text-dark sm:text-4xl md:text-5xl lg:text-6xl">
@@ -44,7 +44,7 @@ export default function HeroSection() {
               <span>Jadwal 2026 Dibuka</span>
             </div>
             <span>•</span>
-            <span>Tulungagung & Sekitarnya</span>
+            <span>Tulungagung, Blitar, Kediri & Trenggalek</span>
           </div>
         </div>
 

@@ -15,34 +15,37 @@ import {
   Send,
   AlertCircle,
   FileCheck,
+  Star,
+  Quote,
 } from "lucide-react";
 
-type Revision = {
+type Testimonial = {
   id: string;
   date: string;
+  rating: number;
   message: string;
-  status: "pending" | "in_progress" | "done";
-  reply?: string;
+  status: "pending" | "published";
 };
 
 export default function ClientDashboardPage() {
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
-  const [activeTab, setActiveTab] = useState<"info" | "files" | "revisi">("info");
+  const [activeTab, setActiveTab] = useState<"info" | "files" | "testimoni">("info");
 
   // State untuk form upload bukti bayar
   const [uploadSuccess, setUploadSuccess] = useState(false);
   const [uploadFile, setUploadFile] = useState<File | null>(null);
 
-  // State untuk form revisi
-  const [revisionText, setRevisionText] = useState("");
-  const [revisions, setRevisions] = useState<Revision[]>([
+  // State untuk form testimoni
+  const [rating, setRating] = useState(5);
+  const [testimonialText, setTestimonialText] = useState("");
+  const [testimonials, setTestimonials] = useState<Testimonial[]>([
     {
       id: "1",
       date: "15 Nov 2026",
-      message: "Tolong ganti lagu di video Reels 1 dengan lagu yang lebih mellow pas bagian akad.",
-      status: "done",
-      reply: "Sudah diganti ya kak, silakan cek di folder hasil edit v2.",
+      rating: 5,
+      message: "Hasil videonya keren banget! Timnya ramah dan kerjanya sat-set. Makasih ACC Moment!",
+      status: "published",
     },
   ]);
 
@@ -69,19 +72,21 @@ export default function ClientDashboardPage() {
     }, 4000);
   };
 
-  const handleAddRevision = (e: React.FormEvent) => {
+  const handleAddTestimonial = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!revisionText.trim()) return;
+    if (!testimonialText.trim()) return;
 
-    const newRev: Revision = {
+    const newTesti: Testimonial = {
       id: Date.now().toString(),
-      date: "Hari ini",
-      message: revisionText,
+      date: new Date().toLocaleDateString("id-ID", { day: 'numeric', month: 'short', year: 'numeric' }),
+      rating: rating,
+      message: testimonialText,
       status: "pending",
     };
 
-    setRevisions([newRev, ...revisions]);
-    setRevisionText("");
+    setTestimonials([newTesti, ...testimonials]);
+    setTestimonialText("");
+    alert("Terima kasih atas testimoninya! Admin akan meninjau sebelum ditampilkan.");
   };
 
   if (!mounted) return null;
@@ -91,22 +96,22 @@ export default function ClientDashboardPage() {
       {/* Top Bar Dashboard */}
       <header className="border-b border-border bg-warm-white">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-4">
-          <div>
-            <Link href="/" className="font-heading text-lg font-bold text-primary">
-              ACC Moment
+          <div className="flex flex-col leading-none">
+            <Link href="/" className="font-cursive text-xl text-text-dark">
+              Acc
             </Link>
-            <p className="text-xs text-text-light">Portal Klien</p>
+            <span className="font-heading text-sm font-bold tracking-widest text-primary uppercase -mt-0.5">Moment</span>
           </div>
 
           <div className="flex items-center gap-4">
-            <span className="hidden text-sm font-medium text-text-dark sm:inline">
-              Hai, Sarah & Dimas 👋
+            <span className="hidden text-[11px] font-bold uppercase tracking-wider text-text-dark sm:inline">
+              Sarah & Dimas
             </span>
             <button
               onClick={handleLogout}
-              className="inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs font-medium text-text-medium transition-colors hover:bg-primary-pale hover:text-primary"
+              className="inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-text-medium transition-colors hover:bg-primary-pale hover:text-primary"
             >
-              <LogOut size={14} aria-hidden="true" />
+              <LogOut size={12} aria-hidden="true" />
               Keluar
             </button>
           </div>
@@ -116,27 +121,27 @@ export default function ClientDashboardPage() {
       {/* Main Content Dashboard */}
       <main className="mx-auto max-w-6xl px-5 py-8">
         {/* Banner Status Acara */}
-        <div className="rounded-lg border border-border bg-warm-white p-6 shadow-sm">
+        <div className="rounded-xl border border-border bg-warm-white p-6 shadow-sm">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <span className="inline-block rounded bg-secondary/15 px-2.5 py-1 text-xs font-medium text-secondary">
+              <span className="inline-block rounded-full bg-secondary/15 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-secondary">
                 Paket Gold • Pernikahan
               </span>
               <h1 className="mt-2 font-heading text-2xl font-bold text-text-dark sm:text-3xl">
                 Sarah & Dimas
               </h1>
-              <p className="mt-1 text-sm text-text-light">
-                Kode Booking: <span className="font-mono font-bold text-text-dark">ACC-DEMO</span> | Tanggal Acara: 25 Desember 2026
+              <p className="mt-1 text-xs font-semibold uppercase tracking-wider text-text-light">
+                Booking: <span className="text-text-dark">ACC-DEMO</span> | 25 Des 2026
               </p>
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-3 py-1 text-xs font-medium text-amber-700 ring-1 ring-amber-200">
-                <Clock size={13} aria-hidden="true" />
-                Status DP: Terverifikasi
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-amber-700 ring-1 ring-amber-200">
+                <Clock size={12} aria-hidden="true" />
+                DP Terverifikasi
               </span>
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700 ring-1 ring-emerald-200">
-                <CheckCircle2 size={13} aria-hidden="true" />
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-emerald-700 ring-1 ring-emerald-200">
+                <CheckCircle2 size={12} aria-hidden="true" />
                 Jadwal Terkunci
               </span>
             </div>
@@ -144,115 +149,98 @@ export default function ClientDashboardPage() {
         </div>
 
         {/* Navigation Tabs */}
-        <div className="mt-8 border-b border-border">
-          <nav className="flex space-x-6" aria-label="Tabs">
-            <button
-              onClick={() => setActiveTab("info")}
-              className={`border-b-2 py-3 text-sm font-medium transition-colors ${
-                activeTab === "info"
-                  ? "border-primary text-primary"
-                  : "border-transparent text-text-medium hover:text-text-dark"
-              }`}
-            >
-              Info Paket & Tagihan
-            </button>
-            <button
-              onClick={() => setActiveTab("files")}
-              className={`border-b-2 py-3 text-sm font-medium transition-colors ${
-                activeTab === "files"
-                  ? "border-primary text-primary"
-                  : "border-transparent text-text-medium hover:text-text-dark"
-              }`}
-            >
-              Akses File & Konten
-            </button>
-            <button
-              onClick={() => setActiveTab("revisi")}
-              className={`border-b-2 py-3 text-sm font-medium transition-colors ${
-                activeTab === "revisi"
-                  ? "border-primary text-primary"
-                  : "border-transparent text-text-medium hover:text-text-dark"
-              }`}
-            >
-              Catatan Revisi ({revisions.length})
-            </button>
+        <div className="mt-8 border-b border-border overflow-x-auto no-scrollbar">
+          <nav className="flex space-x-8 min-w-max" aria-label="Tabs">
+            {[
+              { id: "info", label: "Tagihan & Pembayaran" },
+              { id: "files", label: "Akses File Konten" },
+              { id: "testimoni", label: "Berikan Testimoni" },
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id as any)}
+                className={`border-b-2 pb-3 text-[11px] font-bold uppercase tracking-[0.15em] transition-all ${
+                  activeTab === tab.id
+                    ? "border-primary text-primary"
+                    : "border-transparent text-text-light hover:text-text-dark"
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
           </nav>
         </div>
 
         {/* Tab 1: Info Paket & Tagihan */}
         {activeTab === "info" && (
           <div className="mt-6 grid gap-6 md:grid-cols-2">
-            <div className="rounded-lg border border-border bg-warm-white p-6 shadow-sm">
-              <h2 className="font-heading text-lg font-bold text-text-dark">
+            <div className="rounded-xl border border-border bg-warm-white p-6 shadow-sm">
+              <h2 className="font-heading text-lg font-bold text-text-dark uppercase tracking-widest">
                 Rincian Tagihan
               </h2>
-              <div className="mt-4 space-y-3 divide-y divide-border/60">
-                <div className="flex justify-between pt-2 text-sm">
-                  <span className="text-text-medium">Total Biaya Paket Gold</span>
-                  <span className="font-semibold text-text-dark">Rp 3.500.000</span>
+              <div className="mt-6 space-y-4 divide-y divide-border/40">
+                <div className="flex justify-between pt-2 text-xs font-semibold uppercase tracking-wider">
+                  <span className="text-text-medium">Total Paket Gold</span>
+                  <span className="text-text-dark">Rp 3.500.000</span>
                 </div>
-                <div className="flex justify-between pt-2 text-sm">
-                  <span className="text-text-medium">Down Payment (DP) 50%</span>
-                  <span className="font-semibold text-emerald-600">- Rp 1.750.000 (Lunas)</span>
+                <div className="flex justify-between pt-4 text-xs font-semibold uppercase tracking-wider">
+                  <span className="text-text-medium">Down Payment (DP)</span>
+                  <span className="text-emerald-600">- Rp 1.750.000 (Lunas)</span>
                 </div>
-                <div className="flex justify-between pt-2 text-sm font-bold">
+                <div className="flex justify-between pt-4 text-sm font-bold uppercase tracking-widest border-t-2 border-primary/20">
                   <span className="text-text-dark">Sisa Pelunasan</span>
                   <span className="text-primary">Rp 1.750.000</span>
                 </div>
               </div>
 
-              <div className="mt-6 rounded-md bg-cream p-4 text-xs text-text-medium">
-                <p className="font-semibold text-text-dark">Info Rekening Pembayaran:</p>
-                <p className="mt-1">Bank BCA: <span className="font-mono font-bold text-text-dark">1234-5678-90</span> a.n. ACC Moment</p>
-                <p className="mt-0.5 text-text-light">Pelunasan dilakukan paling lambat H-1 sebelum acara atau hari H.</p>
+              <div className="mt-8 rounded-xl bg-primary/5 border border-primary/10 p-5 text-[11px] text-text-medium">
+                <p className="font-bold uppercase tracking-widest text-text-dark mb-2">Info Pembayaran:</p>
+                <p className="flex justify-between border-b border-primary/10 pb-1.5 mb-1.5">
+                  <span>Bank BCA</span>
+                  <span className="font-mono font-bold text-text-dark">1234-5678-90</span>
+                </p>
+                <p className="flex justify-between">
+                  <span>Atas Nama</span>
+                  <span className="font-bold text-text-dark">ACC MOMENT</span>
+                </p>
+                <p className="mt-4 italic opacity-75">Pelunasan dilakukan paling lambat H-1 sebelum acara.</p>
               </div>
             </div>
 
-            <div className="rounded-lg border border-border bg-warm-white p-6 shadow-sm">
-              <h2 className="font-heading text-lg font-bold text-text-dark">
-                Upload Bukti Transfer
+            <div className="rounded-xl border border-border bg-warm-white p-6 shadow-sm">
+              <h2 className="font-heading text-lg font-bold text-text-dark uppercase tracking-widest">
+                Konfirmasi Bayar
               </h2>
-              <p className="mt-1 text-sm text-text-medium">
-                Kirim foto/tangkapan layar bukti transfer pelunasan atau DP Anda di sini.
+              <p className="mt-2 text-[11px] font-semibold text-text-medium uppercase tracking-wider">
+                Upload bukti transfer pelunasan atau DP Anda di sini.
               </p>
 
               {uploadSuccess ? (
-                <div className="mt-4 rounded-md border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">
-                  <div className="flex items-center gap-2 font-semibold">
-                    <FileCheck size={18} aria-hidden="true" />
-                    Bukti berhasil diunggah!
+                <div className="mt-6 rounded-xl border border-emerald-200 bg-emerald-50 p-5 text-emerald-800">
+                  <div className="flex items-center gap-2 font-bold uppercase tracking-widest text-xs">
+                    <FileCheck size={20} />
+                    Berhasil Diunggah
                   </div>
-                  <p className="mt-1 text-xs">
-                    Admin akan memverifikasi pembayaran Anda dalam 1x24 jam.
+                  <p className="mt-2 text-[10px] leading-relaxed font-medium uppercase tracking-wider">
+                    Admin akan memverifikasi pembayaran Anda dalam 24 jam.
                   </p>
                 </div>
               ) : (
-                <form onSubmit={handleUploadPayment} className="mt-4 space-y-4">
-                  <div className="flex justify-center rounded-lg border-2 border-dashed border-border px-6 py-8 hover:bg-cream/50">
+                <form onSubmit={handleUploadPayment} className="mt-6 space-y-5">
+                  <div className="flex justify-center rounded-xl border-2 border-dashed border-border/60 bg-cream/30 px-6 py-10 transition-colors hover:border-primary/40 hover:bg-primary-pale/30">
                     <div className="text-center">
-                      <Upload className="mx-auto h-8 w-8 text-text-light" aria-hidden="true" />
-                      <div className="mt-2 flex text-sm text-text-medium">
-                        <label
-                          htmlFor="file-upload"
-                          className="relative cursor-pointer font-semibold text-primary hover:underline"
-                        >
-                          <span>Pilih file</span>
-                          <input
-                            id="file-upload"
-                            name="file-upload"
-                            type="file"
-                            accept="image/*"
-                            className="sr-only"
-                            onChange={(e) => setUploadFile(e.target.files?.[0] || null)}
-                          />
+                      <Upload className="mx-auto h-8 w-8 text-primary/40" />
+                      <div className="mt-4 flex text-[11px] font-bold uppercase tracking-widest text-text-medium">
+                        <label htmlFor="file-upload" className="relative cursor-pointer text-primary hover:text-secondary">
+                          <span>Pilih File</span>
+                          <input id="file-upload" name="file-upload" type="file" accept="image/*" className="sr-only" onChange={(e) => setUploadFile(e.target.files?.[0] || null)} />
                         </label>
-                        <p className="pl-1">atau tarik ke sini</p>
+                        <p className="pl-1.5">atau drop di sini</p>
                       </div>
-                      <p className="text-xs text-text-light mt-1">PNG, JPG, PDF maksimal 5MB</p>
-                      {uploadFile && (
-                        <p className="mt-2 text-xs font-semibold text-primary">
-                          Terpilih: {uploadFile.name}
-                        </p>
+                      {uploadFile ? (
+                        <p className="mt-3 text-[10px] font-bold text-primary truncate max-w-[200px]">✓ {uploadFile.name}</p>
+                      ) : (
+                        <p className="text-[9px] text-text-light mt-2 uppercase tracking-tighter">Maksimal 5MB (JPG/PNG)</p>
                       )}
                     </div>
                   </div>
@@ -260,7 +248,7 @@ export default function ClientDashboardPage() {
                   <button
                     type="submit"
                     disabled={!uploadFile}
-                    className="w-full rounded-md bg-primary px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-primary/90 disabled:opacity-50"
+                    className="w-full rounded-xl bg-primary py-3.5 text-[11px] font-bold uppercase tracking-[0.2em] text-white shadow-lg shadow-primary/20 transition-all hover:bg-secondary disabled:opacity-50 active:scale-95"
                   >
                     Kirim Bukti Pembayaran
                   </button>
@@ -270,179 +258,146 @@ export default function ClientDashboardPage() {
           </div>
         )}
 
-        {/* Tab 2: Akses Konten (Drive Links) */}
+        {/* Tab 2: Akses Konten (Merged Drive Links) */}
         {activeTab === "files" && (
-          <div className="mt-6 space-y-6">
-            <div className="grid gap-6 md:grid-cols-2">
-              {/* Box File Mentah */}
-              <div className="rounded-lg border border-border bg-warm-white p-6 shadow-sm">
-                <div className="flex items-start gap-4">
-                  <div className="rounded-lg bg-amber-50 p-3 text-amber-700">
-                    <FolderArchive size={28} aria-hidden="true" />
+          <div className="mt-6">
+            <div className="rounded-xl border border-border bg-warm-white p-8 shadow-sm">
+              <div className="flex flex-col items-center text-center">
+                <div className="flex gap-4 mb-6">
+                  <div className="rounded-full bg-amber-50 p-4 text-amber-700 shadow-sm ring-1 ring-amber-100">
+                    <FolderArchive size={32} />
                   </div>
-                  <div>
-                    <h2 className="font-heading text-lg font-bold text-text-dark">
-                      File Mentahan (Raw Footage)
-                    </h2>
-                    <p className="mt-1 text-sm text-text-medium">
-                      Semua video dan foto original tanpa editan langsung dari kamera tim kami di hari acara.
-                    </p>
+                  <div className="rounded-full bg-emerald-50 p-4 text-emerald-700 shadow-sm ring-1 ring-emerald-100">
+                    <Film size={32} />
                   </div>
                 </div>
+                
+                <h2 className="font-heading text-2xl font-bold text-text-dark uppercase tracking-widest">
+                  Akses Folder Google Drive
+                </h2>
+                <p className="mt-3 max-w-lg text-[11px] font-semibold leading-relaxed text-text-medium uppercase tracking-wider">
+                  Seluruh file dokumentasi Anda (Raw Footage & Video Hasil Edit) telah kami satukan dalam satu folder utama untuk kemudahan akses.
+                </p>
 
-                <div className="mt-6 rounded-md bg-cream p-4">
-                  <div className="flex items-center justify-between text-xs text-text-light">
-                    <span>Status File:</span>
-                    <span className="font-semibold text-emerald-600">Sudah Siap Diunduh</span>
-                  </div>
-                  <div className="mt-2 flex items-center justify-between text-xs text-text-light">
-                    <span>Estimasi Masa Aktif Link:</span>
-                    <span>30 Hari</span>
-                  </div>
-                </div>
-
-                <a
-                  href="https://drive.google.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-6 flex w-full items-center justify-center gap-2 rounded-md bg-primary px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-primary/90"
-                >
-                  <ExternalLink size={16} aria-hidden="true" />
-                  Buka Folder Google Drive Mentahan
-                </a>
-              </div>
-
-              {/* Box Video Hasil Edit */}
-              <div className="rounded-lg border border-border bg-warm-white p-6 shadow-sm">
-                <div className="flex items-start gap-4">
-                  <div className="rounded-lg bg-emerald-50 p-3 text-emerald-700">
-                    <Film size={28} aria-hidden="true" />
-                  </div>
-                  <div>
-                    <h2 className="font-heading text-lg font-bold text-text-dark">
-                      Video Hasil Edit (Reels & TikTok)
-                    </h2>
-                    <p className="mt-1 text-sm text-text-medium">
-                      Video yang sudah siap tayang, sudah di-grading warna, audio sinkron, dan siap upload ke medsos.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="mt-6 rounded-md bg-cream p-4">
-                  <div className="flex items-center justify-between text-xs text-text-light">
-                    <span>Status Pengerjaan:</span>
-                    <span className="font-semibold text-primary">Revisi v2 Tersedia</span>
-                  </div>
-                  <div className="mt-2 flex items-center justify-between text-xs text-text-light">
-                    <span>Jumlah Video:</span>
-                    <span>5 Video Siap Tayang</span>
-                  </div>
+                <div className="mt-8 grid w-full gap-4 sm:grid-cols-2">
+                   <div className="rounded-xl bg-cream border border-border/60 p-5">
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-text-light mb-1">Status Konten:</p>
+                      <p className="text-sm font-bold text-emerald-600">SIAP DIUNDUH</p>
+                   </div>
+                   <div className="rounded-xl bg-cream border border-border/60 p-5">
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-text-light mb-1">Masa Aktif Link:</p>
+                      <p className="text-sm font-bold text-text-dark">30 HARI</p>
+                   </div>
                 </div>
 
                 <a
                   href="https://drive.google.com"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="mt-6 flex w-full items-center justify-center gap-2 rounded-md bg-primary px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-primary/90"
+                  className="mt-8 flex w-full max-w-md items-center justify-center gap-3 rounded-xl bg-primary py-4 text-xs font-bold uppercase tracking-[0.2em] text-white shadow-xl shadow-primary/20 transition-all hover:bg-secondary active:scale-95"
                 >
-                  <ExternalLink size={16} aria-hidden="true" />
-                  Buka Folder Google Drive Hasil Edit
+                  <ExternalLink size={18} />
+                  Buka Folder Dokumentasi
                 </a>
+                
+                <p className="mt-6 text-[10px] font-medium text-text-light uppercase tracking-widest italic">
+                  *Gunakan koneksi stabil untuk mendownload file berukuran besar.
+                </p>
               </div>
-            </div>
-
-            {/* Embedded Google Drive Preview Tips */}
-            <div className="rounded-lg border border-border bg-primary-pale/40 p-4 text-sm text-text-medium">
-              <p className="font-semibold text-text-dark">💡 Tips Mengunduh:</p>
-              <p className="mt-1">
-                Gunakan koneksi Wi-Fi yang stabil saat mendownload seluruh file mentah karena ukurannya bisa mencapai puluhan gigabyte.
-              </p>
             </div>
           </div>
         )}
 
-        {/* Tab 3: Catatan Revisi */}
-        {activeTab === "revisi" && (
-          <div className="mt-6 grid gap-6 md:grid-cols-3">
-            {/* Form Buat Revisi Baru */}
-            <div className="md:col-span-1">
-              <div className="rounded-lg border border-border bg-warm-white p-6 shadow-sm">
-                <h2 className="font-heading text-lg font-bold text-text-dark">
-                  Tambah Catatan Revisi
+        {/* Tab 3: Testimoni */}
+        {activeTab === "testimoni" && (
+          <div className="mt-6 grid gap-6 md:grid-cols-5">
+            {/* Form Buat Testimoni Baru */}
+            <div className="md:col-span-2">
+              <div className="rounded-xl border border-border bg-warm-white p-6 shadow-sm">
+                <h2 className="font-heading text-lg font-bold text-text-dark uppercase tracking-widest">
+                  Berikan Testimoni
                 </h2>
-                <p className="mt-1 text-xs text-text-medium">
-                  Ada bagian yang ingin disesuaikan? Tulis menit ke berapa dan instruksi jelasnya di sini.
+                <p className="mt-2 text-[11px] font-semibold text-text-medium uppercase tracking-wider">
+                  Pengalaman Anda sangat berharga bagi kami. Bagikan kesan Anda di sini!
                 </p>
 
-                <form onSubmit={handleAddRevision} className="mt-4 space-y-4">
+                <form onSubmit={handleAddTestimonial} className="mt-6 space-y-5">
                   <div>
-                    <label htmlFor="revText" className="sr-only">
-                      Instruksi Revisi
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-text-light mb-2 block">Rating Pelayanan:</label>
+                    <div className="flex gap-2">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <button
+                          key={star}
+                          type="button"
+                          onClick={() => setRating(star)}
+                          className="transition-transform active:scale-125"
+                        >
+                          <Star
+                            size={24}
+                            className={star <= rating ? "fill-primary text-primary" : "text-border fill-transparent"}
+                          />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <label htmlFor="testiText" className="text-[10px] font-bold uppercase tracking-widest text-text-light mb-2 block">
+                      Komentar / Pesan:
                     </label>
                     <textarea
-                      id="revText"
-                      rows={4}
-                      value={revisionText}
-                      onChange={(e) => setRevisionText(e.target.value)}
-                      placeholder="Contoh: Di video Reels menit 00:15, tolong potong bagian pas orang lewat di belakang..."
-                      className="w-full rounded-md border border-border bg-cream p-3 text-sm text-text-dark placeholder:text-xs placeholder:text-text-light/60 focus:outline-none focus:ring-2 focus:ring-primary"
+                      id="testiText"
+                      rows={5}
+                      value={testimonialText}
+                      onChange={(e) => setTestimonialText(e.target.value)}
+                      placeholder="Tuliskan pengalaman Anda bekerja bersama tim ACC Moment..."
+                      className="w-full rounded-xl border border-border bg-cream p-4 text-xs font-medium text-text-dark placeholder:text-text-light/50 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                     />
                   </div>
 
                   <button
                     type="submit"
-                    disabled={!revisionText.trim()}
-                    className="flex w-full items-center justify-center gap-2 rounded-md bg-primary px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-primary/90 disabled:opacity-50"
+                    disabled={!testimonialText.trim()}
+                    className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-3.5 text-[11px] font-bold uppercase tracking-[0.2em] text-white shadow-lg shadow-primary/20 transition-all hover:bg-secondary disabled:opacity-50 active:scale-95"
                   >
-                    <Send size={15} aria-hidden="true" />
-                    Kirim Catatan Revisi
+                    <Send size={14} />
+                    Kirim Testimoni
                   </button>
                 </form>
               </div>
             </div>
 
-            {/* Daftar Riwayat Revisi */}
-            <div className="md:col-span-2">
-              <div className="rounded-lg border border-border bg-warm-white p-6 shadow-sm">
-                <h2 className="font-heading text-lg font-bold text-text-dark">
-                  Riwayat Revisi
+            {/* Riwayat Testimoni */}
+            <div className="md:col-span-3">
+              <div className="rounded-xl border border-border bg-warm-white p-6 shadow-sm">
+                <h2 className="font-heading text-lg font-bold text-text-dark uppercase tracking-widest">
+                  Testimoni Anda
                 </h2>
 
-                <div className="mt-4 space-y-4">
-                  {revisions.map((rev) => (
-                    <div
-                      key={rev.id}
-                      className="rounded-lg border border-border bg-cream p-4"
-                    >
-                      <div className="flex items-center justify-between text-xs">
-                        <span className="font-semibold text-text-dark">{rev.date}</span>
-                        <span
-                          className={`rounded px-2 py-0.5 font-medium ${
-                            rev.status === "done"
-                              ? "bg-emerald-100 text-emerald-800"
-                              : rev.status === "in_progress"
-                              ? "bg-blue-100 text-blue-800"
-                              : "bg-amber-100 text-amber-800"
-                          }`}
-                        >
-                          {rev.status === "done"
-                            ? "Selesai Dikerjakan"
-                            : rev.status === "in_progress"
-                            ? "Sedang Dikerjakan"
-                            : "Menunggu Antrean"}
+                <div className="mt-6 space-y-4">
+                  {testimonials.map((testi) => (
+                    <div key={testi.id} className="relative rounded-xl border border-border/60 bg-cream p-5">
+                      <Quote className="absolute right-4 top-4 h-8 w-8 text-primary/10" />
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex gap-0.5">
+                          {[...Array(5)].map((_, i) => (
+                            <Star key={i} size={12} className={i < testi.rating ? "fill-primary text-primary" : "text-border"} />
+                          ))}
+                        </div>
+                        <span className={`rounded-full px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-widest ${
+                          testi.status === 'published' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'
+                        }`}>
+                          {testi.status === 'published' ? 'Ditampilkan' : 'Menunggu Moderasi'}
                         </span>
                       </div>
 
-                      <p className="mt-2 text-sm text-text-medium">
-                        &ldquo;{rev.message}&rdquo;
+                      <p className="text-xs font-medium italic text-text-dark leading-relaxed">
+                        &ldquo;{testi.message}&rdquo;
                       </p>
-
-                      {rev.reply && (
-                        <div className="mt-3 rounded-md bg-warm-white p-3 text-xs border border-border/80">
-                          <p className="font-semibold text-primary">Tanggapan Editor:</p>
-                          <p className="mt-0.5 text-text-medium">{rev.reply}</p>
-                        </div>
-                      )}
+                      
+                      <p className="mt-4 text-[10px] font-bold uppercase tracking-widest text-text-light">
+                        {testi.date}
+                      </p>
                     </div>
                   ))}
                 </div>

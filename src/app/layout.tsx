@@ -22,9 +22,9 @@ const greatVibes = Great_Vibes({
 });
 
 export const metadata: Metadata = {
-  title: "ACC Moment | Wedding Content Creator Tulungagung",
+  title: "ACC Moment | WCC & All Event Tulungagung, Blitar, Kediri & Trenggalek",
   description:
-    "Your personal content creator. Wedding & All Event di Tulungagung dan sekitarnya.",
+    "Your personal content creator. Melayani Wedding Content Creator & All Event di Tulungagung, Blitar, Kediri, Trenggalek dan sekitarnya.",
 };
 
 export default async function RootLayout(props: LayoutProps<"/">) {
