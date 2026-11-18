@@ -21,12 +21,16 @@ import {
   ChevronRight,
   TrendingUp,
   Receipt,
+  MessageCircle,
+  Send,
 } from "lucide-react";
 
 type Booking = {
   id: string;
   code: string;
+  pin: string;
   clientName: string;
+  clientPhone: string;
   date: string;
   package: string;
   status: "pending" | "confirmed" | "completed";
@@ -49,7 +53,9 @@ const INITIAL_BOOKINGS: Booking[] = [
   {
     id: "1",
     code: "ACC-DEMO",
+    pin: "1234",
     clientName: "Sarah & Dimas",
+    clientPhone: "081234567890",
     date: "2026-12-25",
     package: "Paket Gold",
     status: "confirmed",
@@ -57,30 +63,6 @@ const INITIAL_BOOKINGS: Booking[] = [
     rawDriveLink: "https://drive.google.com/drive/folders/demo-raw",
     editedDriveLink: "https://drive.google.com/drive/folders/demo-edit",
     assignedTeam: ["Andi (Shooter)", "Rian (Editor)"],
-  },
-  {
-    id: "2",
-    code: "ACC-202611-002",
-    clientName: "Nadia & Reza",
-    date: "2026-11-20",
-    package: "Paket Platinum",
-    status: "confirmed",
-    paymentStatus: "lunas",
-    rawDriveLink: "https://drive.google.com/drive/folders/nadia-raw",
-    editedDriveLink: "https://drive.google.com/drive/folders/nadia-edit",
-    assignedTeam: ["Budi (Lead)", "Andi (Shooter)", "Rian (Editor)"],
-  },
-  {
-    id: "3",
-    code: "ACC-202611-003",
-    clientName: "Fitri & Bayu",
-    date: "2026-12-05",
-    package: "Paket Silver",
-    status: "pending",
-    paymentStatus: "unpaid",
-    rawDriveLink: "",
-    editedDriveLink: "",
-    assignedTeam: [],
   },
 ];
 
@@ -92,22 +74,6 @@ const INITIAL_EXPENSES: Expense[] = [
     category: "Transport",
     amount: 150000,
     description: "Bensin PP Tulungagung - Kediri",
-  },
-  {
-    id: "2",
-    date: "2026-11-15",
-    event: "Nadia & Reza",
-    category: "Konsumsi",
-    amount: 100000,
-    description: "Makan siang 2 kru lapangan",
-  },
-  {
-    id: "3",
-    date: "2026-11-16",
-    event: "Nadia & Reza",
-    category: "Fee Tim",
-    amount: 1200000,
-    description: "Honor 2 shooter & 1 editor",
   },
 ];
 
@@ -137,6 +103,52 @@ export default function AdminDashboardPage() {
 
   const totalExpense = expenses.reduce((acc, exp) => acc + exp.amount, 0);
   const netProfit = totalRevenue - totalExpense;
+
+  const handleSendWA = (booking: Booking) => {
+    const message = encodeURIComponent(
+      `Halo ${booking.clientName}! Terima kasih sudah memesan paket ${booking.package} di ACC Moment.\n\n` +
+      `Jadwal Anda sudah kami kunci untuk tanggal: ${booking.date}.\n\n` +
+      `Berikut adalah akses Portal Klien Anda:\n` +
+      `• Kode Booking: *${booking.code}*\n` +
+      `• PIN: *${booking.pin}*\n\n` +
+      `Silakan akses di: http://localhost:3000/client/login\n\n` +
+      `Simpan Kode & PIN ini ya, untuk mengakses file video & progres revisi Anda.`
+    );
+    window.open(`https://wa.me/${booking.clientPhone.replace(/\D/g, "")}?text=${message}`, "_blank");
+  };
+
+  const handleAddClient = () => {
+    const name = prompt("Nama Pasangan / Klien?");
+    if (!name) return;
+    const phone = prompt("Nomor WhatsApp (Contoh: 0812...)?");
+    if (!phone) return;
+    const date = prompt("Tanggal Acara (YYYY-MM-DD)?", new Date().toISOString().split("T")[0]);
+    const pkg = prompt("Paket (Silver/Gold/Platinum)?", "Paket Gold");
+    
+    const code = `ACC-${date?.replace(/-/g, "") || "000"}-${Math.floor(100+Math.random()*900)}`;
+    const pin = Math.floor(1000+Math.random()*9000).toString();
+    
+    const newBooking: Booking = {
+      id: Date.now().toString(),
+      code,
+      pin,
+      clientName: name,
+      clientPhone: phone,
+      date: date || "",
+      package: pkg || "",
+      status: "confirmed",
+      paymentStatus: "dp",
+      rawDriveLink: "",
+      editedDriveLink: "",
+      assignedTeam: [],
+    };
+    
+    setBookings([newBooking, ...bookings]);
+    
+    if (confirm("Klien berhasil ditambahkan! Kirim Kode & PIN sekarang via WhatsApp?")) {
+      handleSendWA(newBooking);
+    }
+  };
 
   const handleUpdateDrive = (id: string, raw: string, edited: string) => {
     setBookings(
@@ -176,472 +188,195 @@ export default function AdminDashboardPage() {
 
   return (
     <div className="min-h-screen bg-cream pb-12">
-      {/* Top Bar Admin - Compact & Clean */}
+      {/* Top Bar Admin */}
       <header className="sticky top-0 z-40 border-b border-border bg-warm-white/95 backdrop-blur-md">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6">
           <div className="flex items-center gap-2.5">
             <Link
               href="/"
-              className="flex min-h-[40px] items-center gap-1.5 text-xs font-semibold text-text-medium hover:text-primary sm:hidden"
-              title="Ke Website Utama"
+              className="flex min-h-[40px] items-center gap-1.5 text-xs font-semibold text-text-medium hover:text-primary lg:hidden"
             >
-              <ArrowLeft size={16} aria-hidden="true" />
+              <ArrowLeft size={16} />
             </Link>
-            <div className="flex items-center gap-2">
-              <span className="font-heading text-base sm:text-lg font-bold text-primary">
-                ACC Moment
-              </span>
-              <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] sm:text-xs font-semibold text-primary">
-                Admin
-              </span>
+            <div className="flex flex-col leading-none">
+              <span className="font-cursive text-lg text-text-dark">Acc</span>
+              <span className="font-heading text-sm font-bold tracking-widest text-primary uppercase -mt-0.5">Moment</span>
             </div>
+            <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold text-primary ml-1">ADMIN</span>
           </div>
 
           <Link
             href="/"
-            className="hidden sm:inline-flex items-center gap-1 rounded-md border border-border bg-cream px-3 py-1.5 text-xs font-medium text-text-dark hover:bg-primary-pale"
+            className="hidden sm:inline-flex items-center gap-1 rounded-md border border-border bg-cream px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-text-dark hover:bg-primary-pale"
           >
-            Lihat Website Utama &rarr;
+            Website Utama &rarr;
           </Link>
         </div>
 
-        {/* Mobile Horizontal Scrollable Tab Bar */}
+        {/* Tab Bar */}
         <div className="border-t border-border/80 bg-warm-white px-2 sm:px-6">
-          <nav
-            className="flex space-x-2 overflow-x-auto no-scrollbar py-2"
-            aria-label="Admin Tabs"
-          >
+          <nav className="flex space-x-1 overflow-x-auto no-scrollbar py-1.5">
             <button
               onClick={() => setActiveTab("orders")}
-              className={`flex min-h-[42px] shrink-0 items-center gap-1.5 rounded-lg px-3.5 py-2 text-xs font-semibold transition-all ${
-                activeTab === "orders"
-                  ? "bg-primary text-white shadow-sm"
-                  : "bg-cream text-text-medium hover:text-text-dark active:bg-primary-pale"
+              className={`flex min-h-[40px] shrink-0 items-center gap-1.5 rounded-lg px-4 py-2 text-xs font-bold uppercase tracking-widest transition-all ${
+                activeTab === "orders" ? "bg-primary text-white shadow-sm" : "bg-transparent text-text-medium"
               }`}
             >
-              <ShoppingBag size={15} aria-hidden="true" />
-              <span>Pesanan ({bookings.length})</span>
+              <ShoppingBag size={14} /> Pesanan
             </button>
-
             <button
               onClick={() => setActiveTab("team")}
-              className={`flex min-h-[42px] shrink-0 items-center gap-1.5 rounded-lg px-3.5 py-2 text-xs font-semibold transition-all ${
-                activeTab === "team"
-                  ? "bg-primary text-white shadow-sm"
-                  : "bg-cream text-text-medium hover:text-text-dark active:bg-primary-pale"
+              className={`flex min-h-[40px] shrink-0 items-center gap-1.5 rounded-lg px-4 py-2 text-xs font-bold uppercase tracking-widest transition-all ${
+                activeTab === "team" ? "bg-primary text-white shadow-sm" : "bg-transparent text-text-medium"
               }`}
             >
-              <Users size={15} aria-hidden="true" />
-              <span>Jadwal & Tim</span>
+              <Users size={14} /> Jadwal & Tim
             </button>
-
             <button
               onClick={() => setActiveTab("finance")}
-              className={`flex min-h-[42px] shrink-0 items-center gap-1.5 rounded-lg px-3.5 py-2 text-xs font-semibold transition-all ${
-                activeTab === "finance"
-                  ? "bg-primary text-white shadow-sm"
-                  : "bg-cream text-text-medium hover:text-text-dark active:bg-primary-pale"
+              className={`flex min-h-[40px] shrink-0 items-center gap-1.5 rounded-lg px-4 py-2 text-xs font-bold uppercase tracking-widest transition-all ${
+                activeTab === "finance" ? "bg-primary text-white shadow-sm" : "bg-transparent text-text-medium"
               }`}
             >
-              <DollarSign size={15} aria-hidden="true" />
-              <span>Rekap Keuangan</span>
+              <DollarSign size={14} /> Keuangan
             </button>
           </nav>
         </div>
       </header>
 
       {/* Main Admin Content */}
-      <main className="mx-auto max-w-7xl px-4 py-5 sm:px-6 sm:py-8">
-        {/* ================= TAB 1: KELOLA PESANAN ================= */}
+      <main className="mx-auto max-w-7xl px-4 py-5 sm:px-6">
         {activeTab === "orders" && (
           <div className="space-y-4">
-            <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center justify-between gap-4">
               <div>
-                <h1 className="font-heading text-xl sm:text-2xl font-bold text-text-dark">
-                  Daftar Pesanan Klien
-                </h1>
-                <p className="text-xs sm:text-sm text-text-light">
-                  Kelola status acara dan tautkan folder Google Drive untuk klien.
-                </p>
+                <h1 className="font-heading text-xl font-bold text-text-dark">Kelola Pesanan</h1>
+                <p className="text-[11px] text-text-light uppercase tracking-wider font-semibold">Update progress & link drive klien</p>
               </div>
+              <button
+                onClick={handleAddClient}
+                className="flex min-h-[44px] items-center gap-2 rounded-lg bg-secondary px-4 py-2 text-xs font-bold uppercase tracking-widest text-white shadow-md active:scale-95 transition-transform"
+              >
+                <Plus size={16} /> <span className="hidden sm:inline">Tambah Klien Deal</span>
+              </button>
             </div>
 
-            {/* TAMPILAN MOBILE: CARD-BASED LIST (Sangat Nyaman di Layar HP!) */}
-            <div className="space-y-3.5 md:hidden">
+            {/* Mobile View Card */}
+            <div className="space-y-3 md:hidden">
               {bookings.map((booking) => (
-                <div
-                  key={booking.id}
-                  className="rounded-xl border border-border bg-warm-white p-4 shadow-sm"
-                >
-                  {/* Header Card */}
-                  <div className="flex items-start justify-between gap-2 border-b border-border/80 pb-3">
+                <div key={booking.id} className="rounded-xl border border-border bg-warm-white p-4 shadow-sm">
+                  <div className="flex items-start justify-between border-b border-border/60 pb-3">
                     <div>
-                      <h2 className="font-heading text-base font-bold text-text-dark">
-                        {booking.clientName}
-                      </h2>
-                      <p className="font-mono text-xs text-text-light">
-                        {booking.code}
-                      </p>
+                      <h2 className="font-heading text-base font-bold text-text-dark">{booking.clientName}</h2>
+                      <p className="font-mono text-[10px] text-text-light uppercase tracking-tighter">ID: {booking.code} • PIN: {booking.pin}</p>
                     </div>
-                    <span className="rounded bg-secondary/15 px-2.5 py-1 text-[11px] font-semibold text-secondary shrink-0">
-                      {booking.package}
-                    </span>
+                    <button 
+                      onClick={() => handleSendWA(booking)}
+                      className="rounded-full bg-emerald-500 p-2 text-white shadow-sm active:scale-90 transition-transform"
+                      title="Kirim ulang WA"
+                    >
+                      <MessageCircle size={16} />
+                    </button>
                   </div>
-
-                  {/* Info Status & Tanggal */}
-                  <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
+                  
+                  <div className="mt-3 grid grid-cols-2 gap-y-3 text-[11px] font-semibold uppercase tracking-wider">
                     <div>
-                      <span className="text-text-light text-[11px]">Tanggal Acara:</span>
-                      <p className="font-medium text-text-dark mt-0.5 flex items-center gap-1">
-                        <Calendar size={13} className="text-primary" />
-                        {booking.date}
-                      </p>
+                      <span className="text-text-light block text-[9px]">Tanggal:</span>
+                      <span className="text-text-dark">{booking.date}</span>
                     </div>
-
                     <div>
-                      <span className="text-text-light text-[11px]">Status Acara:</span>
-                      <div className="mt-0.5">
-                        <span
-                          className={`inline-block rounded-full px-2 py-0.5 text-[10px] font-semibold ${
-                            booking.status === "completed"
-                              ? "bg-emerald-100 text-emerald-800"
-                              : booking.status === "confirmed"
-                              ? "bg-blue-100 text-blue-800"
-                              : "bg-amber-100 text-amber-800"
-                          }`}
-                        >
-                          {booking.status === "completed"
-                            ? "Selesai"
-                            : booking.status === "confirmed"
-                            ? "Terkonfirmasi"
-                            : "Pending"}
-                        </span>
-                      </div>
+                      <span className="text-text-light block text-[9px]">Paket:</span>
+                      <span className="text-primary">{booking.package}</span>
                     </div>
-
                     <div>
-                      <span className="text-text-light text-[11px]">Status Bayar:</span>
-                      <div className="mt-0.5">
-                        <span
-                          className={`inline-block rounded-full px-2 py-0.5 text-[10px] font-semibold ${
-                            booking.paymentStatus === "lunas"
-                              ? "bg-emerald-100 text-emerald-800"
-                              : booking.paymentStatus === "dp"
-                              ? "bg-amber-100 text-amber-800"
-                              : "bg-red-100 text-red-800"
-                          }`}
-                        >
-                          {booking.paymentStatus === "lunas"
-                            ? "Lunas"
-                            : booking.paymentStatus === "dp"
-                            ? "DP 50%"
-                            : "Belum Bayar"}
-                        </span>
-                      </div>
+                      <span className="text-text-light block text-[9px]">Status:</span>
+                      <span className={`px-2 py-0.5 rounded-full text-[9px] ${
+                        booking.status === 'confirmed' ? "bg-blue-100 text-blue-700" : "bg-emerald-100 text-emerald-700"
+                      }`}>{booking.status}</span>
                     </div>
-
                     <div>
-                      <span className="text-text-light text-[11px]">Tim Bertugas:</span>
-                      <p className="font-medium text-text-dark mt-0.5 truncate">
-                        {booking.assignedTeam.length > 0
-                          ? booking.assignedTeam.join(", ")
-                          : "Belum diatur"}
-                      </p>
+                      <span className="text-text-light block text-[9px]">Bayar:</span>
+                      <span className={`px-2 py-0.5 rounded-full text-[9px] ${
+                        booking.paymentStatus === 'dp' ? "bg-amber-100 text-amber-700" : "bg-emerald-100 text-emerald-700"
+                      }`}>{booking.paymentStatus}</span>
                     </div>
                   </div>
 
-                  {/* Link Drive Status */}
-                  <div className="mt-3.5 rounded-lg bg-cream p-2.5 text-xs space-y-1.5 border border-border/80">
-                    <div className="flex items-center justify-between">
-                      <span className="text-text-medium flex items-center gap-1">
-                        <FolderArchive size={13} className="text-amber-700" />
-                        File Mentah:
-                      </span>
-                      {booking.rawDriveLink ? (
-                        <a
-                          href={booking.rawDriveLink}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="font-medium text-primary underline"
-                        >
-                          Tersedia &rarr;
-                        </a>
-                      ) : (
-                        <span className="text-text-light">Belum diisi</span>
-                      )}
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <span className="text-text-medium flex items-center gap-1">
-                        <Film size={13} className="text-emerald-700" />
-                        Hasil Edit:
-                      </span>
-                      {booking.editedDriveLink ? (
-                        <a
-                          href={booking.editedDriveLink}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="font-medium text-emerald-600 underline"
-                        >
-                          Tersedia &rarr;
-                        </a>
-                      ) : (
-                        <span className="text-text-light">Belum diisi</span>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Tombol Action Edit Link Drive */}
                   <button
                     onClick={() => setSelectedBooking(booking)}
-                    className="mt-3.5 flex min-h-[44px] w-full items-center justify-center gap-2 rounded-lg border border-border bg-warm-white px-4 py-2 text-xs font-semibold text-text-dark transition-colors active:bg-primary-pale hover:border-primary-light"
+                    className="mt-4 flex min-h-[40px] w-full items-center justify-center gap-2 rounded-lg border border-border bg-cream px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-text-dark active:bg-primary-pale"
                   >
-                    <Edit3 size={14} className="text-primary" />
-                    Kelola Link Google Drive
+                    <Edit3 size={14} /> Update Link Drive
                   </button>
                 </div>
               ))}
             </div>
 
-            {/* TAMPILAN DESKTOP: TABEL LEBAR (Aktif di Layar Lebar) */}
+            {/* Desktop Table View */}
             <div className="hidden overflow-hidden rounded-xl border border-border bg-warm-white shadow-sm md:block">
-              <table className="w-full text-left text-sm">
-                <thead className="border-b border-border bg-cream text-xs font-semibold text-text-medium uppercase">
+              <table className="w-full text-left text-xs">
+                <thead className="border-b border-border bg-cream font-bold uppercase tracking-widest text-text-medium">
                   <tr>
-                    <th className="px-5 py-3">Kode / Klien</th>
-                    <th className="px-5 py-3">Tanggal Acara</th>
-                    <th className="px-5 py-3">Paket</th>
-                    <th className="px-5 py-3">Status Acara</th>
-                    <th className="px-5 py-3">Pembayaran</th>
-                    <th className="px-5 py-3">Link Drive Klien</th>
-                    <th className="px-5 py-3">Aksi</th>
+                    <th className="px-5 py-4">Klien / Kode</th>
+                    <th className="px-5 py-4">Tanggal</th>
+                    <th className="px-5 py-4">Status</th>
+                    <th className="px-5 py-4">Link Drive</th>
+                    <th className="px-5 py-4 text-center">Aksi</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border/60">
                   {bookings.map((booking) => (
                     <tr key={booking.id} className="hover:bg-cream/40">
                       <td className="px-5 py-4">
-                        <p className="font-semibold text-text-dark">
-                          {booking.clientName}
-                        </p>
-                        <p className="font-mono text-xs text-text-light">
-                          {booking.code}
-                        </p>
+                        <p className="font-bold text-text-dark">{booking.clientName}</p>
+                        <p className="font-mono text-[10px] text-text-light">Code: {booking.code} • PIN: {booking.pin}</p>
                       </td>
-                      <td className="px-5 py-4 text-text-medium">
-                        {booking.date}
-                      </td>
-                      <td className="px-5 py-4 text-text-medium">
-                        {booking.package}
+                      <td className="px-5 py-4 font-semibold text-text-medium">{booking.date}</td>
+                      <td className="px-5 py-4">
+                        <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 font-bold text-emerald-800 uppercase text-[9px] tracking-wide">{booking.status}</span>
                       </td>
                       <td className="px-5 py-4">
-                        <span
-                          className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                            booking.status === "completed"
-                              ? "bg-emerald-100 text-emerald-800"
-                              : booking.status === "confirmed"
-                              ? "bg-blue-100 text-blue-800"
-                              : "bg-amber-100 text-amber-800"
-                          }`}
-                        >
-                          {booking.status === "completed"
-                            ? "Selesai"
-                            : booking.status === "confirmed"
-                            ? "Terkonfirmasi"
-                            : "Pending"}
-                        </span>
-                      </td>
-                      <td className="px-5 py-4">
-                        <span
-                          className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                            booking.paymentStatus === "lunas"
-                              ? "bg-emerald-100 text-emerald-800"
-                              : booking.paymentStatus === "dp"
-                              ? "bg-amber-100 text-amber-800"
-                              : "bg-red-100 text-red-800"
-                          }`}
-                        >
-                          {booking.paymentStatus === "lunas"
-                            ? "Lunas"
-                            : booking.paymentStatus === "dp"
-                            ? "DP 50%"
-                            : "Belum Bayar"}
-                        </span>
-                      </td>
-                      <td className="px-5 py-4">
-                        <div className="flex flex-col gap-1 text-xs">
-                          {booking.rawDriveLink ? (
-                            <a
-                              href={booking.rawDriveLink}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center gap-1 text-primary hover:underline"
-                            >
-                              <ExternalLink size={12} /> Drive Mentahan
-                            </a>
-                          ) : (
-                            <span className="text-text-light">Drive Mentah: Belum ada</span>
-                          )}
-                          {booking.editedDriveLink ? (
-                            <a
-                              href={booking.editedDriveLink}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center gap-1 text-emerald-600 hover:underline"
-                            >
-                              <ExternalLink size={12} /> Drive Hasil Edit
-                            </a>
-                          ) : (
-                            <span className="text-text-light">Drive Edit: Belum ada</span>
-                          )}
+                        <div className="flex flex-col gap-1">
+                          {booking.rawDriveLink ? <span className="text-emerald-600 font-bold">✓ Raw Ready</span> : <span className="text-text-light italic">Raw: Empty</span>}
+                          {booking.editedDriveLink ? <span className="text-emerald-600 font-bold">✓ Edit Ready</span> : <span className="text-text-light italic">Edit: Empty</span>}
                         </div>
                       </td>
                       <td className="px-5 py-4">
-                        <button
-                          onClick={() => setSelectedBooking(booking)}
-                          className="rounded-lg border border-border bg-cream px-3 py-1.5 text-xs font-medium text-text-dark hover:bg-primary-pale hover:text-primary"
-                        >
-                          Edit Link Drive
-                        </button>
+                        <div className="flex items-center justify-center gap-2">
+                          <button onClick={() => setSelectedBooking(booking)} className="rounded border border-border bg-warm-white p-2 text-text-dark hover:border-primary active:bg-primary-pale" title="Edit Link">
+                            <Edit3 size={14} />
+                          </button>
+                          <button onClick={() => handleSendWA(booking)} className="rounded border border-border bg-emerald-50 p-2 text-emerald-600 hover:border-emerald-500 active:bg-emerald-100" title="Send WA">
+                            <MessageCircle size={14} />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
-
-            {/* Modal Edit Link Google Drive - Mobile Responsive Bottom Sheet / Dialog */}
-            {selectedBooking && (
-              <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 p-0 sm:p-4 backdrop-blur-xs">
-                <div className="w-full max-w-lg rounded-t-2xl sm:rounded-2xl border border-border bg-warm-white p-5 sm:p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
-                  <div className="flex items-center justify-between border-b border-border pb-3">
-                    <div>
-                      <h3 className="font-heading text-base sm:text-lg font-bold text-text-dark">
-                        Kelola Google Drive
-                      </h3>
-                      <p className="text-xs text-text-light">
-                        Klien: <strong className="text-text-dark">{selectedBooking.clientName}</strong>
-                      </p>
-                    </div>
-                    <button
-                      onClick={() => setSelectedBooking(null)}
-                      className="rounded-full p-2 text-text-light hover:bg-cream"
-                      aria-label="Tutup modal"
-                    >
-                      <XCircle size={20} />
-                    </button>
-                  </div>
-
-                  <p className="mt-3 text-xs text-text-medium leading-relaxed">
-                    Tempelkan tautan folder Google Drive di bawah. Klien dapat langsung membuka file ini melalui portal klien mereka.
-                  </p>
-
-                  <div className="mt-4 space-y-4">
-                    <div>
-                      <label className="block text-xs font-semibold text-text-dark">
-                        Link Folder Drive (File Mentah / Raw)
-                      </label>
-                      <input
-                        type="url"
-                        defaultValue={selectedBooking.rawDriveLink}
-                        id="rawLinkInput"
-                        placeholder="https://drive.google.com/drive/folders/..."
-                        className="mt-1 min-h-[44px] w-full rounded-lg border border-border bg-cream p-3 text-xs text-text-dark focus:ring-2 focus:ring-primary focus:outline-none"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-semibold text-text-dark">
-                        Link Folder Drive (Video Hasil Edit)
-                      </label>
-                      <input
-                        type="url"
-                        defaultValue={selectedBooking.editedDriveLink}
-                        id="editedLinkInput"
-                        placeholder="https://drive.google.com/drive/folders/..."
-                        className="mt-1 min-h-[44px] w-full rounded-lg border border-border bg-cream p-3 text-xs text-text-dark focus:ring-2 focus:ring-primary focus:outline-none"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-                    <button
-                      onClick={() => setSelectedBooking(null)}
-                      className="min-h-[44px] rounded-lg border border-border px-4 py-2.5 text-xs font-semibold text-text-medium hover:bg-cream"
-                    >
-                      Batal
-                    </button>
-                    <button
-                      onClick={() => {
-                        const raw = (document.getElementById("rawLinkInput") as HTMLInputElement).value;
-                        const edited = (document.getElementById("editedLinkInput") as HTMLInputElement).value;
-                        handleUpdateDrive(selectedBooking.id, raw, edited);
-                      }}
-                      className="min-h-[44px] rounded-lg bg-primary px-5 py-2.5 text-xs font-semibold text-white shadow-sm hover:bg-primary/90"
-                    >
-                      Simpan Perubahan
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
         )}
 
-        {/* ================= TAB 2: JADWAL & TIM ================= */}
+        {/* Tab Jadwal & Tim */}
         {activeTab === "team" && (
           <div className="space-y-4">
-            <div>
-              <h1 className="font-heading text-xl sm:text-2xl font-bold text-text-dark">
-                Jadwal & Penugasan Tim
-              </h1>
-              <p className="text-xs sm:text-sm text-text-light">
-                Pantau penugasan shooter dan editor untuk memastikan jadwal tidak bertumpuk.
-              </p>
-            </div>
-
-            <div className="grid gap-3.5 sm:gap-4 md:grid-cols-3">
+            <h1 className="font-heading text-xl font-bold text-text-dark">Jadwal & Tim Kerja</h1>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {bookings.map((b) => (
-                <div
-                  key={b.id}
-                  className="rounded-xl border border-border bg-warm-white p-4 shadow-sm"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="font-mono text-xs font-bold text-primary">
-                      {b.code}
-                    </span>
-                    <span className="rounded bg-secondary/15 px-2 py-0.5 text-[11px] font-semibold text-secondary">
-                      {b.package}
-                    </span>
+                <div key={b.id} className="rounded-xl border border-border bg-warm-white p-4 shadow-sm">
+                  <div className="flex justify-between border-b border-border/40 pb-2 mb-3">
+                    <span className="font-bold text-[10px] text-primary uppercase tracking-widest">{b.package}</span>
+                    <span className="font-mono text-[10px] text-text-light">{b.date}</span>
                   </div>
-
-                  <h3 className="mt-2 font-heading text-base sm:text-lg font-bold text-text-dark">
-                    {b.clientName}
-                  </h3>
-
-                  <p className="mt-1 flex items-center gap-1.5 text-xs text-text-medium">
-                    <Calendar size={13} className="text-primary" /> {b.date}
-                  </p>
-
-                  <div className="mt-3.5 border-t border-border pt-3">
-                    <p className="text-xs font-semibold text-text-dark">
-                      Kru yang Ditugaskan:
-                    </p>
-                    <div className="mt-2 flex flex-wrap gap-1.5">
-                      {b.assignedTeam.length > 0 ? (
-                        b.assignedTeam.map((member, i) => (
-                          <span
-                            key={i}
-                            className="rounded-full bg-cream px-2.5 py-1 text-xs text-text-dark border border-border/80"
-                          >
-                            {member}
-                          </span>
-                        ))
-                      ) : (
-                        <span className="text-xs italic text-red-500">
-                          Belum ada kru ditugaskan!
-                        </span>
-                      )}
+                  <h3 className="font-heading text-base font-bold text-text-dark">{b.clientName}</h3>
+                  <div className="mt-4 pt-3 border-t border-border/40">
+                    <p className="text-[10px] font-bold text-text-light uppercase tracking-widest mb-2">Tim Bertugas:</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {b.assignedTeam.length > 0 ? b.assignedTeam.map((m, i) => (
+                        <span key={i} className="rounded-full bg-cream border border-border px-2.5 py-0.5 text-[10px] font-semibold text-text-dark">{m}</span>
+                      )) : <p className="text-[10px] italic text-red-400">Belum ada tim...</p>}
                     </div>
                   </div>
                 </div>
@@ -650,316 +385,95 @@ export default function AdminDashboardPage() {
           </div>
         )}
 
-        {/* ================= TAB 3: REKAP KEUANGAN ================= */}
+        {/* Tab Keuangan */}
         {activeTab === "finance" && (
-          <div className="space-y-4 sm:space-y-6">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <h1 className="font-heading text-xl sm:text-2xl font-bold text-text-dark">
-                  Rekap Keuangan & Laba Bersih
-                </h1>
-                <p className="text-xs sm:text-sm text-text-light">
-                  Hitung otomatis pemasukan DP, pelunasan, dan biaya operasional.
-                </p>
-              </div>
-
-              <div className="flex gap-2">
-                <button
-                  onClick={() => {
-                    const name = prompt("Nama Klien?");
-                    if (!name) return;
-                    const date = prompt("Tanggal Acara (YYYY-MM-DD)?", new Date().toISOString().split("T")[0]);
-                    const pkg = prompt("Paket?", "Paket Gold");
-                    
-                    const code = `ACC-${date?.replace(/-/g, "") || "000"}-${Math.floor(100+Math.random()*900)}`;
-                    const pin = Math.floor(1000+Math.random()*9000).toString();
-                    
-                    const newBooking: Booking = {
-                      id: Date.now().toString(),
-                      code,
-                      clientName: name,
-                      date: date || "",
-                      package: pkg || "",
-                      status: "confirmed",
-                      paymentStatus: "dp",
-                      rawDriveLink: "",
-                      editedDriveLink: "",
-                      assignedTeam: [],
-                    };
-                    
-                    setBookings([newBooking, ...bookings]);
-                    alert(`Klien Berhasil Ditambahkan!\n\nKirim info ini ke klien:\nKode: ${code}\nPIN: ${pin}`);
-                  }}
-                  className="flex min-h-[44px] flex-1 items-center justify-center gap-1.5 rounded-lg bg-secondary px-3.5 py-2 text-xs font-semibold text-white shadow-sm sm:flex-initial"
-                >
-                  <Plus size={16} />
-                  <span>Tambah Klien DEAL</span>
-                </button>
-
-                <button
-                  onClick={() => setShowExpenseForm(!showExpenseForm)}
-                  className="flex min-h-[44px] flex-1 items-center justify-center gap-1.5 rounded-lg bg-primary px-3.5 py-2 text-xs font-semibold text-white shadow-sm sm:flex-initial"
-                >
-                  <Plus size={16} />
-                  <span>Catat Pengeluaran</span>
-                </button>
-
-                <button
-                  onClick={() => alert("Laporan keuangan berhasil diexport ke file Excel/PDF!")}
-                  className="flex min-h-[44px] items-center justify-center gap-1.5 rounded-lg border border-border bg-warm-white px-3.5 py-2 text-xs font-semibold text-text-dark transition-colors active:bg-primary-pale"
-                  title="Unduh Rekap"
-                >
-                  <FileSpreadsheet size={16} className="text-secondary" />
-                  <span className="hidden sm:inline">Unduh Rekap</span>
-                </button>
-              </div>
+          <div className="space-y-5">
+            <div className="flex items-center justify-between gap-4">
+              <h1 className="font-heading text-xl font-bold text-text-dark">Rekap Keuangan</h1>
+              <button onClick={() => setShowExpenseForm(!showExpenseForm)} className="flex h-11 items-center gap-2 rounded-lg bg-primary px-4 text-xs font-bold uppercase tracking-widest text-white shadow-md">
+                <Plus size={16} /> Catat Pengeluaran
+              </button>
             </div>
 
-            {/* Stat Cards Ringkasan Keuangan - Mobile Optimized */}
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
               <div className="rounded-xl border border-border bg-warm-white p-4 shadow-sm">
-                <div className="flex items-center justify-between text-xs text-text-light">
-                  <span>Total Pemasukan</span>
-                  <TrendingUp size={16} className="text-emerald-600" />
-                </div>
-                <p className="mt-1 font-heading text-xl sm:text-2xl font-bold text-emerald-600">
-                  Rp {totalRevenue.toLocaleString("id-ID")}
-                </p>
-                <p className="mt-0.5 text-[10px] text-text-light">DP & Pelunasan klien</p>
+                <p className="text-[9px] font-bold uppercase tracking-widest text-text-light">Pemasukan</p>
+                <p className="mt-1 text-xl font-bold text-emerald-600">Rp {totalRevenue.toLocaleString("id-ID")}</p>
               </div>
-
               <div className="rounded-xl border border-border bg-warm-white p-4 shadow-sm">
-                <div className="flex items-center justify-between text-xs text-text-light">
-                  <span>Biaya Operasional</span>
-                  <Receipt size={16} className="text-red-500" />
-                </div>
-                <p className="mt-1 font-heading text-xl sm:text-2xl font-bold text-red-500">
-                  Rp {totalExpense.toLocaleString("id-ID")}
-                </p>
-                <p className="mt-0.5 text-[10px] text-text-light">Bensin, makan, fee tim</p>
+                <p className="text-[9px] font-bold uppercase tracking-widest text-text-light">Pengeluaran</p>
+                <p className="mt-1 text-xl font-bold text-red-500">Rp {totalExpense.toLocaleString("id-ID")}</p>
               </div>
-
-              <div className="rounded-xl border border-border bg-warm-white p-4 shadow-sm">
-                <div className="flex items-center justify-between text-xs text-text-light">
-                  <span>Estimasi Laba Bersih</span>
-                  <DollarSign size={16} className="text-primary" />
-                </div>
-                <p className="mt-1 font-heading text-xl sm:text-2xl font-bold text-primary">
-                  Rp {netProfit.toLocaleString("id-ID")}
-                </p>
-                <p className="mt-0.5 text-[10px] text-text-light">Pemasukan dikurangi biaya</p>
+              <div className="rounded-xl border border-border bg-warm-white p-4 shadow-sm border-primary/30 bg-primary/5">
+                <p className="text-[9px] font-bold uppercase tracking-widest text-text-light">Laba Bersih</p>
+                <p className="mt-1 text-xl font-bold text-primary">Rp {netProfit.toLocaleString("id-ID")}</p>
               </div>
             </div>
 
-            {/* Modal / Collapse Input Pengeluaran Baru */}
             {showExpenseForm && (
-              <div className="rounded-xl border border-primary/40 bg-warm-white p-4 sm:p-5 shadow-sm">
-                <div className="flex items-center justify-between border-b border-border pb-2.5">
-                  <h3 className="font-heading text-sm font-bold text-text-dark">
-                    Form Catat Pengeluaran Acara
-                  </h3>
-                  <button
-                    onClick={() => setShowExpenseForm(false)}
-                    className="text-xs text-text-light hover:text-text-dark"
-                  >
-                    Tutup
-                  </button>
-                </div>
-
-                <form onSubmit={handleAddExpense} className="mt-3.5 space-y-3">
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <div>
-                      <label className="block text-xs font-semibold text-text-dark">
-                        Terkait Acara Klien
-                      </label>
-                      <select
-                        value={newExpense.event}
-                        onChange={(e) =>
-                          setNewExpense({ ...newExpense, event: e.target.value })
-                        }
-                        className="mt-1 min-h-[44px] w-full rounded-lg border border-border bg-cream p-2.5 text-xs text-text-dark"
-                      >
-                        <option value="">Pengeluaran Umum / Operasional</option>
-                        {bookings.map((b) => (
-                          <option key={b.id} value={b.clientName}>
-                            {b.clientName} ({b.date})
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-semibold text-text-dark">
-                        Kategori Pengeluaran
-                      </label>
-                      <select
-                        value={newExpense.category}
-                        onChange={(e) =>
-                          setNewExpense({
-                            ...newExpense,
-                            category: e.target.value as Expense["category"],
-                          })
-                        }
-                        className="mt-1 min-h-[44px] w-full rounded-lg border border-border bg-cream p-2.5 text-xs text-text-dark"
-                      >
-                        <option value="Transport">Transport / Bensin</option>
-                        <option value="Konsumsi">Konsumsi Kru</option>
-                        <option value="Fee Tim">Fee Tim (Shooter/Editor)</option>
-                        <option value="Lainnya">Lainnya</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <div>
-                      <label className="block text-xs font-semibold text-text-dark">
-                        Nominal (Rp)
-                      </label>
-                      <input
-                        type="number"
-                        required
-                        placeholder="Contoh: 150000"
-                        value={newExpense.amount}
-                        onChange={(e) =>
-                          setNewExpense({ ...newExpense, amount: e.target.value })
-                        }
-                        className="mt-1 min-h-[44px] w-full rounded-lg border border-border bg-cream p-2.5 text-xs text-text-dark"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-semibold text-text-dark">
-                        Keterangan Rinci
-                      </label>
-                      <input
-                        type="text"
-                        required
-                        placeholder="Contoh: Bensin 2 motor PP gedung"
-                        value={newExpense.description}
-                        onChange={(e) =>
-                          setNewExpense({
-                            ...newExpense,
-                            description: e.target.value,
-                          })
-                        }
-                        className="mt-1 min-h-[44px] w-full rounded-lg border border-border bg-cream p-2.5 text-xs text-text-dark"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="flex justify-end gap-2 pt-2">
-                    <button
-                      type="button"
-                      onClick={() => setShowExpenseForm(false)}
-                      className="min-h-[44px] rounded-lg border border-border px-4 py-2 text-xs font-medium text-text-medium"
-                    >
-                      Batal
-                    </button>
-                    <button
-                      type="submit"
-                      className="min-h-[44px] rounded-lg bg-primary px-5 py-2 text-xs font-semibold text-white shadow-sm hover:bg-primary/90"
-                    >
-                      Simpan Pengeluaran
-                    </button>
-                  </div>
+              <div className="rounded-xl border border-primary/40 bg-warm-white p-5 shadow-lg">
+                <h3 className="font-heading text-sm font-bold text-text-dark uppercase tracking-widest mb-4">Input Pengeluaran Baru</h3>
+                <form onSubmit={handleAddExpense} className="grid gap-4 sm:grid-cols-2">
+                   <select value={newExpense.event} onChange={(e) => setNewExpense({ ...newExpense, event: e.target.value })} className="h-11 rounded-lg border border-border bg-cream px-3 text-xs">
+                     <option value="">Umum / Operasional</option>
+                     {bookings.map(b => <option key={b.id} value={b.clientName}>{b.clientName}</option>)}
+                   </select>
+                   <select value={newExpense.category} onChange={(e) => setNewExpense({ ...newExpense, category: e.target.value as Expense["category"] })} className="h-11 rounded-lg border border-border bg-cream px-3 text-xs">
+                     <option value="Transport">Transport</option>
+                     <option value="Konsumsi">Konsumsi</option>
+                     <option value="Fee Tim">Fee Tim</option>
+                   </select>
+                   <input type="number" required placeholder="Nominal Rp" value={newExpense.amount} onChange={(e) => setNewExpense({ ...newExpense, amount: e.target.value })} className="h-11 rounded-lg border border-border bg-cream px-3 text-xs" />
+                   <input type="text" required placeholder="Keterangan" value={newExpense.description} onChange={(e) => setNewExpense({ ...newExpense, description: e.target.value })} className="h-11 rounded-lg border border-border bg-cream px-3 text-xs" />
+                   <div className="sm:col-span-2 flex justify-end gap-2">
+                     <button type="button" onClick={() => setShowExpenseForm(false)} className="px-4 py-2 text-xs font-bold text-text-light uppercase tracking-widest">Batal</button>
+                     <button type="submit" className="h-11 rounded-lg bg-primary px-6 text-xs font-bold uppercase tracking-widest text-white">Simpan</button>
+                   </div>
                 </form>
               </div>
             )}
 
-            {/* DAFTAR PENGELUARAN */}
-            <div className="space-y-3">
-              <h2 className="font-heading text-base font-bold text-text-dark">
-                Riwayat Pengeluaran Operasional
-              </h2>
-
-              {/* Tampilan Mobile: List Card Pengeluaran */}
-              <div className="space-y-2.5 md:hidden">
-                {expenses.map((exp) => (
-                  <div
-                    key={exp.id}
-                    className="flex items-center justify-between rounded-xl border border-border bg-warm-white p-3.5 shadow-xs"
-                  >
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <span className="rounded bg-cream px-2 py-0.5 text-[10px] font-semibold text-text-dark border border-border">
-                          {exp.category}
-                        </span>
-                        <span className="text-[10px] text-text-light">{exp.date}</span>
-                      </div>
-                      <p className="text-xs font-semibold text-text-dark">
-                        {exp.description}
-                      </p>
-                      <p className="text-[11px] text-text-light">
-                        Acara: {exp.event}
-                      </p>
+            <div className="space-y-2">
+              <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-text-light">Riwayat Pengeluaran</h2>
+              <div className="space-y-2">
+                {expenses.map(exp => (
+                  <div key={exp.id} className="flex items-center justify-between rounded-xl border border-border bg-warm-white p-3 shadow-xs">
+                    <div>
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-text-medium">{exp.category} • <span className="text-text-light font-normal">{exp.date}</span></p>
+                      <p className="text-xs font-bold text-text-dark">{exp.description}</p>
                     </div>
-
-                    <div className="flex flex-col items-end gap-2 shrink-0 ml-3">
-                      <span className="text-xs font-bold text-red-600">
-                        - Rp {exp.amount.toLocaleString("id-ID")}
-                      </span>
-                      <button
-                        onClick={() => handleDeleteExpense(exp.id)}
-                        className="flex min-h-[36px] min-w-[36px] items-center justify-center rounded-md p-1.5 text-text-light hover:text-red-500 active:bg-red-50"
-                        title="Hapus Pengeluaran"
-                        aria-label="Hapus pengeluaran"
-                      >
-                        <Trash2 size={15} />
-                      </button>
+                    <div className="flex items-center gap-3">
+                      <span className="text-xs font-bold text-red-600">-Rp {exp.amount.toLocaleString("id-ID")}</span>
+                      <button onClick={() => handleDeleteExpense(exp.id)} className="p-2 text-text-light hover:text-red-500"><Trash2 size={14} /></button>
                     </div>
                   </div>
                 ))}
-              </div>
-
-              {/* Tampilan Desktop: Tabel Pengeluaran */}
-              <div className="hidden overflow-hidden rounded-xl border border-border bg-warm-white shadow-sm md:block">
-                <table className="w-full text-left text-xs">
-                  <thead className="border-b border-border bg-cream text-text-medium uppercase">
-                    <tr>
-                      <th className="px-4 py-3">Tanggal</th>
-                      <th className="px-4 py-3">Kategori</th>
-                      <th className="px-4 py-3">Acara</th>
-                      <th className="px-4 py-3">Keterangan</th>
-                      <th className="px-4 py-3">Jumlah</th>
-                      <th className="px-4 py-3">Aksi</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-border/60">
-                    {expenses.map((exp) => (
-                      <tr key={exp.id} className="hover:bg-cream/40">
-                        <td className="px-4 py-3 text-text-medium">{exp.date}</td>
-                        <td className="px-4 py-3">
-                          <span className="rounded bg-cream px-2 py-0.5 border border-border text-text-dark">
-                            {exp.category}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3 text-text-dark font-medium">
-                          {exp.event}
-                        </td>
-                        <td className="px-4 py-3 text-text-medium">
-                          {exp.description}
-                        </td>
-                        <td className="px-4 py-3 font-semibold text-red-600">
-                          Rp {exp.amount.toLocaleString("id-ID")}
-                        </td>
-                        <td className="px-4 py-3">
-                          <button
-                            onClick={() => handleDeleteExpense(exp.id)}
-                            className="text-text-light hover:text-red-500"
-                            title="Hapus"
-                          >
-                            <Trash2 size={14} />
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
               </div>
             </div>
           </div>
         )}
       </main>
+
+      {/* Modal Edit Drive */}
+      {selectedBooking && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 p-0 sm:p-4 backdrop-blur-xs">
+          <div className="w-full max-w-lg rounded-t-2xl sm:rounded-2xl border border-border bg-warm-white p-6 shadow-2xl">
+             <div className="flex items-center justify-between mb-4">
+                <h3 className="font-heading text-lg font-bold text-text-dark uppercase tracking-widest">Update Google Drive</h3>
+                <button onClick={() => setSelectedBooking(null)}><XCircle size={24} className="text-text-light" /></button>
+             </div>
+             <div className="space-y-4">
+                <input id="rawLink" type="url" defaultValue={selectedBooking.rawDriveLink} placeholder="Link Folder RAW Footage" className="h-12 w-full rounded-lg border border-border bg-cream px-4 text-xs" />
+                <input id="editLink" type="url" defaultValue={selectedBooking.editedDriveLink} placeholder="Link Folder Video Hasil Edit" className="h-12 w-full rounded-lg border border-border bg-cream px-4 text-xs" />
+                <button onClick={() => {
+                  const raw = (document.getElementById("rawLink") as HTMLInputElement).value;
+                  const edit = (document.getElementById("editLink") as HTMLInputElement).value;
+                  handleUpdateDrive(selectedBooking.id, raw, edit);
+                }} className="h-12 w-full rounded-xl bg-primary text-xs font-bold uppercase tracking-widest text-white shadow-lg active:scale-95 transition-transform">Simpan Tautan</button>
+             </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
