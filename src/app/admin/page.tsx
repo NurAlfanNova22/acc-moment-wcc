@@ -9,12 +9,8 @@ import {
   DollarSign,
   Plus,
   Edit3,
-  ArrowLeft,
   MessageCircle,
-  Trash2,
-  XCircle,
   X,
-  Smartphone,
 } from "lucide-react";
 
 type Booking = {
@@ -61,14 +57,8 @@ const INITIAL_BOOKINGS: Booking[] = [
 export default function AdminDashboardPage() {
   const [activeTab, setActiveTab] = useState<"orders" | "team" | "finance">("orders");
   const [bookings, setBookings] = useState<Booking[]>(INITIAL_BOOKINGS);
-  const [expenses, setExpenses] = useState<Expense[]>([]);
-  
-  // Modals state
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
-  const [isExpenseModalOpen, setIsExpenseModalOpen] = useState(false);
-
-  // Form states
   const [newClient, setNewClient] = useState({ name: "", phone: "", date: "", package: "Paket Gold" });
 
   const handleSendWA = (booking: Booking) => {
@@ -112,7 +102,6 @@ export default function AdminDashboardPage() {
 
   return (
     <div className="min-h-screen bg-cream pb-20 sm:pb-0">
-      {/* Header Admin */}
       <header className="sticky top-0 z-40 border-b border-border bg-warm-white/95 backdrop-blur-md shadow-sm">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6">
           <div className="flex items-center gap-3">
@@ -126,7 +115,6 @@ export default function AdminDashboardPage() {
           </Link>
         </div>
 
-        {/* Tab Switcher - Mobile Optimized */}
         <div className="flex border-t border-border overflow-x-auto no-scrollbar bg-warm-white">
           {[
             { id: "orders", icon: ShoppingBag, label: "Pesanan" },
@@ -160,7 +148,6 @@ export default function AdminDashboardPage() {
               </button>
             </div>
 
-            {/* List Pesanan - Card Style Mobile */}
             <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
               {bookings.map((b) => (
                 <div key={b.id} className="rounded-xl border border-border bg-warm-white p-4 shadow-sm">
@@ -189,10 +176,59 @@ export default function AdminDashboardPage() {
           </div>
         )}
 
-        {/* ... (Team & Finance tabs follow same optimized pattern) */}
+        {activeTab === "team" && (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h1 className="font-heading text-xl font-bold text-text-dark">Jadwal & Tim Kerja</h1>
+              <div className="flex items-center gap-2 rounded-lg bg-cream border border-border px-3 py-1.5 text-[10px] font-bold uppercase text-text-medium">
+                <Calendar size={12} /> {new Date().toLocaleDateString("id-ID", { month: 'long', year: 'numeric' })}
+              </div>
+            </div>
+            <div className="rounded-xl border border-border bg-warm-white p-4 shadow-sm">
+              <div className="mb-4 grid grid-cols-7 gap-1 text-center text-[10px] font-bold uppercase tracking-widest text-text-light">
+                {['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'].map(day => <div key={day}>{day}</div>)}
+              </div>
+              <div className="grid grid-cols-7 gap-1">
+                {Array.from({ length: 30 }, (_, i) => i + 1).map(day => {
+                  const hasEvent = day === 15 || day === 25;
+                  return (
+                    <div 
+                      key={day} 
+                      className={`relative flex h-14 flex-col items-center justify-center rounded-lg border border-border/40 text-xs font-bold transition-colors ${
+                        hasEvent ? 'bg-primary/10 border-primary/30 text-primary' : 'bg-cream/30 text-text-medium'
+                      }`}
+                    >
+                      <span>{day}</span>
+                      {hasEvent && <div className="absolute bottom-1.5 h-1 w-1 rounded-full bg-primary" />}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === "finance" && (
+          <div className="space-y-5">
+            <h1 className="font-heading text-xl font-bold text-text-dark">Rekap Keuangan</h1>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+              <div className="rounded-xl border border-border bg-warm-white p-4 shadow-sm">
+                <p className="text-[9px] font-bold uppercase tracking-widest text-text-light">Pemasukan</p>
+                <p className="mt-1 text-xl font-bold text-emerald-600">Rp 1.750.000</p>
+              </div>
+              <div className="rounded-xl border border-border bg-warm-white p-4 shadow-sm">
+                <p className="text-[9px] font-bold uppercase tracking-widest text-text-light">Pengeluaran</p>
+                <p className="mt-1 text-xl font-bold text-red-500">Rp 0</p>
+              </div>
+              <div className="rounded-xl border border-border bg-warm-white p-4 shadow-sm border-primary/30 bg-primary/5">
+                <p className="text-[9px] font-bold uppercase tracking-widest text-text-light">Laba Bersih</p>
+                <p className="mt-1 text-xl font-bold text-primary">Rp 1.750.000</p>
+              </div>
+            </div>
+          </div>
+        )}
       </main>
 
-      {/* MODAL: TAMBAH KLIEN */}
       {isAddModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-end justify-center bg-black/60 backdrop-blur-sm sm:items-center sm:p-4">
           <div className="w-full max-w-md rounded-t-2xl bg-warm-white p-6 shadow-2xl sm:rounded-2xl animate-in slide-in-from-bottom duration-300">
@@ -231,7 +267,6 @@ export default function AdminDashboardPage() {
         </div>
       )}
 
-      {/* MODAL: UPDATE DRIVE (Similar fix) */}
       {selectedBooking && (
         <div className="fixed inset-0 z-[100] flex items-end justify-center bg-black/60 backdrop-blur-sm sm:items-center sm:p-4">
           <div className="w-full max-w-md rounded-t-2xl bg-warm-white p-6 shadow-2xl sm:rounded-2xl">
