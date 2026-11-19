@@ -1,156 +1,123 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import Link from "next/link";
-import { KeyRound, Lock, ArrowRight, Loader2, AlertCircle } from "lucide-react";
+import { Lock, ArrowRight, Home, AlertCircle } from "lucide-react";
 
 export default function ClientLoginPage() {
   const router = useRouter();
   const [bookingCode, setBookingCode] = useState("");
   const [pin, setPin] = useState("");
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  // Sync data dari admin di localStorage
+  const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setIsLoading(true);
 
-    if (!bookingCode.trim() || !pin.trim()) {
-      setError("Kode booking dan PIN wajib diisi");
-      return;
-    }
+    setTimeout(() => {
+      // Ambil data bookings dari localStorage (Database bayangan)
+      const savedBookings = localStorage.getItem("acc_bookings");
+      const bookings = savedBookings ? JSON.parse(savedBookings) : [];
+      
+      // Cari klien yang cocok
+      const client = bookings.find((b: any) => b.code === bookingCode && b.pin === pin);
 
-    setLoading(true);
-
-    // Simulasi verifikasi login klien
-    // Format demo: Kode: ACC-DEMO, PIN: 1234
-    await new Promise((r) => setTimeout(r, 600));
-
-    if (
-      bookingCode.toUpperCase() === "ACC-DEMO" &&
-      pin === "1234"
-    ) {
-      // Simpan session simpel di localStorage untuk demo
-      localStorage.setItem(
-        "client_session",
-        JSON.stringify({ bookingCode: "ACC-DEMO", clientName: "Sarah & Dimas" })
-      );
-      router.push("/client/dashboard");
-    } else {
-      setError("Kode Booking atau PIN tidak sesuai. Silakan hubungi admin via WhatsApp jika lupa.");
-      setLoading(false);
-    }
+      if (client) {
+        // Simpan sesi login klien
+        sessionStorage.setItem("clientSession", JSON.stringify(client));
+        router.push("/client/dashboard");
+      } else {
+        setError("KODE BOOKING ATAU PIN SALAH. MOHON PERIKSA KEMBALI.");
+        setIsLoading(false);
+      }
+    }, 1000);
   };
 
   return (
-    <div className="flex min-h-screen flex-col justify-center bg-cream px-5 py-12">
-      <div className="mx-auto w-full max-w-md">
-        <div className="text-center">
-          <Link href="/" className="inline-block">
-            <span className="font-heading text-2xl font-bold text-primary">
-              ACC Moment
-            </span>
-          </Link>
-          <h1 className="mt-4 font-heading text-3xl font-bold text-text-dark">
-            Portal Klien
-          </h1>
-          <p className="mt-2 text-sm text-text-medium">
-            Masukkan Kode Booking & PIN yang diberikan oleh admin untuk
-            mengakses file dan progres acaramu.
-          </p>
-        </div>
+    <div className="min-h-screen bg-[#FDFBF0] flex flex-col items-center justify-center p-6 relative overflow-hidden">
+      {/* Decorative */}
+      <div className="absolute top-0 right-0 w-64 h-64 bg-[#C5A059]/5 rounded-full -mr-32 -mt-32 blur-3xl"></div>
+      <div className="absolute bottom-0 left-0 w-64 h-64 bg-[#2A1E17]/5 rounded-full -ml-32 -mb-32 blur-3xl"></div>
+      
+      <div className="w-full max-w-md z-10 animate-in fade-in zoom-in-95 duration-700">
+        <div className="bg-white rounded-[3rem] shadow-2xl shadow-primary/10 border border-[#D4C3A3]/30 p-10 sm:p-14 relative overflow-hidden">
+          
+          <div className="flex justify-center mb-12">
+            <Link href="/" className="relative w-48 h-16 transform hover:scale-105 transition-transform duration-300">
+              <Image src="/logo.png" alt="Logo" fill className="object-contain" priority />
+            </Link>
+          </div>
 
-        <div className="mt-8 rounded-lg border border-border bg-warm-white p-6 shadow-sm">
-          {error && (
-            <div className="mb-5 flex items-start gap-2.5 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-600">
-              <AlertCircle size={18} className="mt-0.5 shrink-0" aria-hidden="true" />
-              <span>{error}</span>
-            </div>
-          )}
+          <div className="text-center mb-10">
+            <h1 className="font-heading text-2xl font-bold text-[#2A1E17] uppercase tracking-tight">Portal Klien</h1>
+            <div className="h-0.5 w-12 bg-[#C5A059] mx-auto mt-2"></div>
+          </div>
 
-          <form onSubmit={handleSubmit} noValidate className="space-y-4">
-            <div>
-              <label
-                htmlFor="bookingCode"
-                className="mb-1.5 flex items-center gap-1.5 text-sm font-medium text-text-dark"
-              >
-                <KeyRound size={15} className="text-text-light" aria-hidden="true" />
-                Kode Booking
-              </label>
-              <input
-                id="bookingCode"
-                type="text"
+          <form onSubmit={handleLogin} className="space-y-6">
+            <div className="space-y-2">
+              <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#C5A059] ml-1">Kode Booking</label>
+              <input 
+                type="text" 
+                required
+                placeholder="ACC-XXXXXXXX-XXX"
                 value={bookingCode}
                 onChange={(e) => setBookingCode(e.target.value.toUpperCase())}
-                placeholder="Contoh: ACC-20261117-001"
-                className="w-full rounded-md border border-border bg-cream px-4 py-2.5 text-sm uppercase tracking-wider text-text-dark placeholder:normal-case placeholder:tracking-normal placeholder:text-text-light/60 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                className="w-full h-14 bg-[#FDFBF0] border border-[#D4C3A3] rounded-2xl px-5 text-sm font-bold tracking-widest placeholder:text-[#8E7F75]/30 outline-none focus:border-[#C5A059] focus:ring-4 focus:ring-[#C5A059]/5 transition-all"
               />
             </div>
 
-            <div>
-              <label
-                htmlFor="pin"
-                className="mb-1.5 flex items-center gap-1.5 text-sm font-medium text-text-dark"
-              >
-                <Lock size={15} className="text-text-light" aria-hidden="true" />
-                PIN (4 Digit)
-              </label>
-              <input
-                id="pin"
-                type="password"
-                maxLength={4}
-                value={pin}
-                onChange={(e) => setPin(e.target.value.replace(/\D/g, ""))}
-                placeholder="4 digit PIN"
-                className="w-full rounded-md border border-border bg-cream px-4 py-2.5 text-center text-lg tracking-widest text-text-dark placeholder:text-sm placeholder:tracking-normal placeholder:text-text-light/60 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-              />
+            <div className="space-y-2">
+              <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#C5A059] ml-1">PIN Akses</label>
+              <div className="relative group">
+                <input 
+                  type="password" 
+                  required
+                  maxLength={4}
+                  placeholder="****"
+                  value={pin}
+                  onChange={(e) => setPin(e.target.value)}
+                  className="w-full h-14 bg-[#FDFBF0] border border-[#D4C3A3] rounded-2xl px-5 text-sm font-bold tracking-[0.8em] placeholder:text-[#8E7F75]/30 outline-none focus:border-[#C5A059] focus:ring-4 focus:ring-[#C5A059]/5 transition-all"
+                />
+                <Lock size={16} className="absolute right-5 top-1/2 -translate-y-1/2 text-[#D4C3A3] group-focus-within:text-[#C5A059] transition-colors" />
+              </div>
             </div>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="mt-6 flex w-full items-center justify-center gap-2 rounded-md bg-primary px-5 py-3 text-sm font-medium text-white transition-colors hover:bg-primary/90 active:bg-primary/80 disabled:opacity-60"
+            {error && (
+              <div className="bg-red-50 text-red-600 text-[9px] font-bold uppercase p-4 rounded-xl border border-red-100 flex items-center gap-3 animate-shake">
+                <AlertCircle size={14} />
+                {error}
+              </div>
+            )}
+
+            <button 
+              type="submit" 
+              disabled={isLoading}
+              className="w-full h-16 bg-[#2A1E17] text-white rounded-2xl font-bold uppercase tracking-[0.3em] text-[10px] shadow-xl shadow-[#2A1E17]/20 flex items-center justify-center gap-3 active:scale-[0.98] transition-all disabled:opacity-70"
             >
-              {loading ? (
-                <>
-                  <Loader2 size={16} className="animate-spin" aria-hidden="true" />
-                  Memverifikasi...
-                </>
+              {isLoading ? (
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                  MENGONTROL AKSES...
+                </div>
               ) : (
-                <>
-                  Masuk ke Dashboard
-                  <ArrowRight size={16} aria-hidden="true" />
-                </>
+                <>MASUK PORTAL <ArrowRight size={16} /></>
               )}
             </button>
           </form>
 
-          <div className="mt-6 rounded-md bg-primary-pale/60 p-3 text-center text-xs text-text-medium">
-            <p className="font-semibold text-text-dark">Petunjuk Demo:</p>
-            <p className="mt-1">
-              Gunakan Kode: <span className="font-mono font-bold text-primary">ACC-DEMO</span> | PIN:{" "}
-              <span className="font-mono font-bold text-primary">1234</span>
-            </p>
+          <div className="mt-12 pt-8 border-t border-[#FDFBF0] text-center space-y-5">
+             <Link href="/" className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-[#8E7F75] hover:text-[#C5A059] transition-colors group">
+               <Home size={14} className="group-hover:-translate-y-0.5 transition-transform" /> Kembali ke Home
+             </Link>
+             <p className="text-[9px] text-[#D4C3A3] uppercase tracking-tighter leading-relaxed">
+               BELUM PUNYA KODE? HUBUNGI ADMIN VIA WHATSAPP
+             </p>
           </div>
-
-          <div className="mt-6 border-t border-border pt-4 text-center">
-            <p className="text-xs text-text-light">
-              Belum punya kode booking?{" "}
-              <Link href="/#pesan" className="text-primary underline hover:no-underline">
-                Pesan paket sekarang
-              </Link>
-            </p>
-          </div>
-        </div>
-
-        <div className="mt-6 text-center">
-          <Link
-            href="/"
-            className="text-xs text-text-light hover:text-text-dark"
-          >
-            &larr; Kembali ke Halaman Utama
-          </Link>
         </div>
       </div>
     </div>
