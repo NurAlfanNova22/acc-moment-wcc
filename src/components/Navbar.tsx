@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Menu, X, Phone, User, ChevronRight } from "lucide-react";
 
 const NAV_LINKS = [
@@ -30,17 +31,26 @@ export default function Navbar() {
               <span>Portal</span>
             </Link>
             
-            <Link href="/" className="hidden lg:flex flex-col leading-none group">
-              <span className="font-cursive text-2xl text-text-dark group-hover:text-primary transition-colors">Acc</span>
-              <span className="font-heading text-lg font-bold tracking-[0.2em] text-primary uppercase -mt-1">Moment</span>
+            <Link href="/" className="hidden lg:block relative w-32 h-10 group">
+              <Image 
+                src="/logo.png" 
+                alt="ACC Moment Logo" 
+                fill
+                className="object-contain"
+                priority
+              />
             </Link>
           </div>
 
           {/* TENGAH: Logo (Mobile) / Nav Links (Desktop) */}
           <div className="flex flex-none items-center justify-center lg:flex-1">
-            <Link href="/" className="flex lg:hidden flex-col items-center leading-none">
-              <span className="font-cursive text-xl text-text-dark">Acc</span>
-              <span className="font-heading text-base font-bold tracking-widest text-primary uppercase -mt-1">Moment</span>
+            <Link href="/" className="relative w-28 h-8 lg:hidden">
+              <Image 
+                src="/logo.png" 
+                alt="ACC Moment Logo" 
+                fill
+                className="object-contain"
+              />
             </Link>
 
             <ul className="hidden lg:flex items-center gap-10">
@@ -74,7 +84,7 @@ export default function Navbar() {
               </a>
             </div>
 
-            {/* BUTTON HAMBURGER: Pastikan z-index tinggi dan type button */}
+            {/* BUTTON HAMBURGER */}
             <button
               type="button"
               onClick={toggleMenu}
@@ -124,7 +134,7 @@ export default function Navbar() {
         </div>
       </header>
 
-      {/* BACKDROP: Untuk menutup menu saat klik di luar */}
+      {/* BACKDROP */}
       {isOpen && (
         <div 
           className="fixed inset-0 z-[80] bg-black/30 backdrop-blur-sm lg:hidden" 

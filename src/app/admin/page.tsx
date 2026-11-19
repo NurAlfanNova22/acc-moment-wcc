@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import NextImage from "next/image";
 import {
   Calendar,
   Users,
@@ -12,6 +13,7 @@ import {
   MessageCircle,
   X,
   Trash2,
+  ChevronDown,
 } from "lucide-react";
 
 type Booking = {
@@ -29,19 +31,18 @@ type Booking = {
   assignedTeam: string[];
 };
 
-type Expense = {
+type Transaction = {
   id: string;
-  date: string;
-  event: string;
-  category: "Transport" | "Konsumsi" | "Fee Tim" | "Lainnya";
+  type: "income" | "expense";
   amount: number;
   description: string;
+  date: string;
 };
 
 const INITIAL_BOOKINGS: Booking[] = [
   {
     id: "1",
-    code: "ACC-DEMO",
+    code: "ACC-20261225-888",
     pin: "1234",
     clientName: "Sarah & Dimas",
     clientPhone: "081234567890",
@@ -51,27 +52,21 @@ const INITIAL_BOOKINGS: Booking[] = [
     paymentStatus: "dp",
     rawDriveLink: "",
     editedDriveLink: "",
-    assignedTeam: ["Andi (Shooter)", "Rian (Editor)"],
+    assignedTeam: ["Andi"],
   },
 ];
 
 export default function AdminDashboardPage() {
   const [activeTab, setActiveTab] = useState<"orders" | "team" | "finance">("orders");
   const [bookings, setBookings] = useState<Booking[]>(INITIAL_BOOKINGS);
-  const [expenses, setExpenses] = useState<Expense[]>([]);
+  const [transactions, setTransactions] = useState<Transaction[]>([
+    { id: "1", type: "income", amount: 1750000, description: "DP Sarah & Dimas", date: "2026-11-20" }
+  ]);
   
-  // Modals state
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
-  const [isExpenseModalOpen, setIsExpenseModalOpen] = useState(false);
-
-  // Form states
-  const [newClient, setNewClient] = useState({ name: "", phone: "", date: "", package: "Paket Gold" });
-  const [newExpense, setNewExpense] = useState({ event: "", category: "Transport" as Expense["category"], amount: "", description: "" });
-
-  // Calculations
-  const totalRevenue = bookings.reduce((acc, b) => b.paymentStatus === "lunas" ? acc + 3500000 : b.paymentStatus === "dp" ? acc + 1750000 : acc, 0);
-  const totalExpense = expenses.reduce((acc, exp) => acc + exp.amount, 0);
+  const [isAddBookingModalOpen, setIsAddBookingModalOpen] = useState(false);
+  const [isAddTransactionModalOpen, setIsAddTransactionModalOpen] = useState(false);
+  const [newBooking, setNewBooking] = useState({ name: "", phone: "", date: "", package: "Paket Gold" });
+  const [newTrans, setNewTrans] = useState({ type: "income" as "income" | "expense", amount: "", description: "" });
 
   const handleSendWA = (booking: Booking) => {
     const message = encodeURIComponent(
@@ -83,148 +78,123 @@ export default function AdminDashboardPage() {
     window.open(`https://wa.me/${booking.clientPhone.replace(/\D/g, "")}?text=${message}`, "_blank");
   };
 
-  const handleAddClientSubmit = (e: React.FormEvent) => {
+  const handleAddBooking = (e: React.FormEvent) => {
     e.preventDefault();
-    const code = `ACC-${newClient.date.replace(/-/g, "")}-${Math.floor(100+Math.random()*900)}`;
-    const pin = Math.floor(1000+Math.random()*9000).toString();
-    
     const b: Booking = {
       id: Date.now().toString(),
-      code,
-      pin,
-      clientName: newClient.name,
-      clientPhone: newClient.phone,
-      date: newClient.date,
-      package: newClient.package,
+      code: `ACC-${newBooking.date.replace(/-/g, "")}-${Math.floor(100 + Math.random() * 900)}`,
+      pin: Math.floor(1000 + Math.random() * 9000).toString(),
+      clientName: newBooking.name,
+      clientPhone: newBooking.phone,
+      date: newBooking.date,
+      package: newBooking.package,
       status: "confirmed",
       paymentStatus: "dp",
       rawDriveLink: "",
       editedDriveLink: "",
       assignedTeam: [],
     };
-    
     setBookings([b, ...bookings]);
-    setIsAddModalOpen(false);
-    setNewClient({ name: "", phone: "", date: "", package: "Paket Gold" });
+    setIsAddBookingModalOpen(false);
+    setNewBooking({ name: "", phone: "", date: "", package: "Paket Gold" });
   };
 
-  const handleAddExpense = (e: React.FormEvent) => {
+  const handleAddTransaction = (e: React.FormEvent) => {
     e.preventDefault();
-    const exp: Expense = {
+    setTransactions([{
       id: Date.now().toString(),
+      type: newTrans.type,
+      amount: parseInt(newTrans.amount),
+      description: newTrans.description,
       date: new Date().toISOString().split("T")[0],
-      event: newExpense.event,
-      category: newExpense.category,
-      amount: parseInt(newExpense.amount, 10),
-      description: newExpense.description,
-    };
-    setExpenses([exp, ...expenses]);
-    setIsExpenseModalOpen(false);
-    setNewExpense({ event: "", category: "Transport", amount: "", description: "" });
+    }, ...transactions]);
+    setIsAddTransactionModalOpen(false);
+    setNewTrans({ type: "income", amount: "", description: "" });
   };
+
+  const totalIncome = transactions.filter(t => t.type === "income").reduce((acc, t) => acc + t.amount, 0);
+  const totalExpense = transactions.filter(t => t.type === "expense").reduce((acc, t) => acc + t.amount, 0);
 
   return (
-    <div className="min-h-screen bg-cream pb-20 sm:pb-0">
-      <header className="sticky top-0 z-40 border-b border-border bg-warm-white/95 backdrop-blur-md shadow-sm">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6">
-          <div className="flex flex-col leading-none">
-            <span className="font-cursive text-xl text-text-dark">Acc</span>
-            <span className="font-heading text-[10px] font-bold tracking-widest text-primary uppercase -mt-1">Admin</span>
-          </div>
-          <Link href="/" className="rounded-full border border-border bg-cream px-4 py-1.5 text-[10px] font-bold uppercase tracking-widest text-text-dark hover:bg-primary-pale">
-            Web &rarr;
+    <div className="min-h-screen bg-[#FDFBF0] text-[#2A1E17]">
+      <nav className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-[#D4C3A3] px-6 py-3">
+        <div className="max-w-5xl mx-auto flex items-center justify-between">
+          <Link href="/" className="relative w-28 h-10">
+            <NextImage src="/logo.png" alt="Logo" fill className="object-contain" />
           </Link>
+          <div className="flex bg-[#FDFBF0] p-1 rounded-lg border border-[#D4C3A3]">
+            {["orders", "team", "finance"].map(t => (
+              <button key={t} onClick={() => setActiveTab(t as any)} className={`px-4 py-1.5 text-[10px] font-bold uppercase tracking-widest rounded-md transition-all ${activeTab === t ? "bg-[#C5A059] text-white shadow-sm" : "text-[#8E7F75]"}`}>
+                {t}
+              </button>
+            ))}
+          </div>
         </div>
+      </nav>
 
-        <div className="flex border-t border-border overflow-x-auto no-scrollbar bg-warm-white">
-          {[
-            { id: "orders", icon: ShoppingBag, label: "Pesanan" },
-            { id: "team", icon: Calendar, label: "Jadwal" },
-            { id: "finance", icon: DollarSign, label: "Keuangan" },
-          ].map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id as any)}
-              className={`flex flex-1 min-h-[50px] items-center justify-center gap-2 px-2 transition-all ${
-                activeTab === tab.id ? "bg-primary text-white" : "text-text-medium"
-              }`}
-            >
-              <tab.icon size={16} />
-              <span className="text-[10px] font-bold uppercase tracking-wider">{tab.label}</span>
-            </button>
-          ))}
-        </div>
-      </header>
-
-      <main className="mx-auto max-w-7xl p-4 sm:p-6">
+      <main className="max-w-5xl mx-auto p-6 space-y-6">
         {activeTab === "orders" && (
           <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h1 className="font-heading text-xl font-bold text-text-dark">Daftar Klien</h1>
-              <button onClick={() => setIsAddModalOpen(true)} className="flex h-11 items-center gap-2 rounded-xl bg-secondary px-4 text-[10px] font-bold uppercase tracking-[0.15em] text-white shadow-lg active:scale-95">
-                <Plus size={16} /> Tambah
-              </button>
-            </div>
-            <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-              {bookings.map((b) => (
-                <div key={b.id} className="rounded-xl border border-border bg-warm-white p-4 shadow-sm">
-                   <div className="flex justify-between border-b border-border/40 pb-3 mb-3">
-                      <div>
-                         <h3 className="font-heading text-base font-bold text-text-dark">{b.clientName}</h3>
-                         <p className="font-mono text-[9px] text-text-light uppercase tracking-tighter">ID: {b.code} • PIN: {b.pin}</p>
-                      </div>
-                      <button onClick={() => handleSendWA(b)} className="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-500 text-white shadow-sm active:scale-90">
-                         <MessageCircle size={18} />
-                      </button>
-                   </div>
-                   <div className="grid grid-cols-2 gap-2 text-[10px] font-bold uppercase tracking-widest text-text-medium mb-4">
-                      <div className="bg-cream p-2 rounded-lg">📅 {b.date}</div>
-                      <div className="bg-cream p-2 rounded-lg text-primary">💎 {b.package}</div>
-                   </div>
-                   <button onClick={() => setSelectedBooking(b)} className="flex h-11 w-full items-center justify-center gap-2 rounded-lg border border-border bg-warm-white text-[10px] font-bold uppercase tracking-widest text-text-dark active:bg-primary-pale">
-                     <Edit3 size={14} /> Update Link Drive
-                   </button>
-                </div>
-              ))}
-            </div>
+             <button onClick={() => setIsAddBookingModalOpen(true)} className="bg-[#2A1E17] text-white px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-widest flex items-center gap-2"><Plus size={14}/> Tambah Pesanan</button>
+             {bookings.map(b => (
+               <div key={b.id} className="bg-white p-5 rounded-2xl border border-[#D4C3A3]/30 shadow-sm flex justify-between items-center">
+                 <div>
+                   <p className="font-heading font-bold text-lg">{b.clientName}</p>
+                   <p className="text-[10px] text-[#8E7F75] uppercase tracking-widest">{b.code} • {b.date}</p>
+                 </div>
+                 <button onClick={() => handleSendWA(b)} className="p-2.5 rounded-full bg-[#E5D5B0] text-[#2A1E17]"><MessageCircle size={16}/></button>
+               </div>
+             ))}
           </div>
         )}
-
         {activeTab === "team" && (
-          <div className="space-y-6">
-            <div className="rounded-xl border border-border bg-warm-white p-3 shadow-sm">
-              <div className="mb-2 grid grid-cols-7 gap-0.5 text-center text-[9px] font-bold uppercase text-text-light">
-                {['M', 'S', 'S', 'R', 'K', 'J', 'S'].map(d => <div key={d}>{d}</div>)}
+          <div className="grid md:grid-cols-2 gap-4">
+            {bookings.map(b => (
+              <div key={b.id} className="bg-white p-6 rounded-2xl border border-[#D4C3A3]/30 space-y-4">
+                <div className="flex justify-between">
+                   <h3 className="font-heading font-bold">{b.clientName}</h3>
+                   <input type="date" defaultValue={b.date} className="text-[10px] bg-[#FDFBF0] border border-[#D4C3A3] p-1 rounded" />
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {b.assignedTeam.map(t => <span key={t} className="px-3 py-1 bg-[#E5D5B0]/30 rounded-full text-[10px] font-bold uppercase">{t} <X size={10} className="inline ml-1 cursor-pointer" onClick={() => setBookings(bookings.map(item => item.id === b.id ? {...item, assignedTeam: item.assignedTeam.filter(name => name !== t)} : item))}/></span>)}
+                </div>
+                <select onChange={(e) => setBookings(bookings.map(item => item.id === b.id ? {...item, assignedTeam: [...item.assignedTeam, e.target.value]} : item))} className="w-full text-xs p-2.5 border rounded-lg bg-[#FDFBF0]">
+                  <option>+ Plot Tim</option>
+                  <option value="Andi">Andi</option><option value="Rian">Rian</option>
+                </select>
               </div>
-              <div className="grid grid-cols-7 gap-0.5">
-                {Array.from({ length: 30 }, (_, i) => i + 1).map(day => (
-                  <div key={day} className={`flex h-8 items-center justify-center rounded text-[9px] font-bold ${day === 15 || day === 25 ? 'bg-primary/20 text-primary' : 'bg-cream/30 text-text-medium'}`}>
-                    {day}
-                  </div>
-                ))}
-              </div>
-            </div>
+            ))}
           </div>
         )}
-
         {activeTab === "finance" && (
-          <div className="space-y-5">
-            <div className="flex items-center justify-between">
-              <h1 className="font-heading text-xl font-bold text-text-dark">Keuangan</h1>
-              <button onClick={() => setIsExpenseModalOpen(true)} className="flex h-9 items-center gap-2 rounded-lg bg-primary px-4 text-[10px] font-bold uppercase text-white">
-                <Plus size={14} /> Pengeluaran
-              </button>
-            </div>
+          <div className="space-y-6">
             <div className="grid grid-cols-3 gap-3">
-              <div className="rounded-xl bg-warm-white p-3 border border-border text-center"><p className="text-[9px] text-text-light uppercase">Masuk</p><p className="font-bold text-emerald-600">Rp{totalRevenue.toLocaleString()}</p></div>
-              <div className="rounded-xl bg-warm-white p-3 border border-border text-center"><p className="text-[9px] text-text-light uppercase">Keluar</p><p className="font-bold text-red-500">Rp{totalExpense.toLocaleString()}</p></div>
-              <div className="rounded-xl bg-primary/5 p-3 border border-primary/20 text-center"><p className="text-[9px] text-text-light uppercase">Laba</p><p className="font-bold text-primary">Rp{(totalRevenue - totalExpense).toLocaleString()}</p></div>
+              <div className="bg-emerald-50 p-4 rounded-xl text-center"><p className="text-[9px] uppercase font-bold text-emerald-800">Masuk</p><p className="font-bold text-sm">Rp{totalIncome.toLocaleString()}</p></div>
+              <div className="bg-red-50 p-4 rounded-xl text-center"><p className="text-[9px] uppercase font-bold text-red-800">Keluar</p><p className="font-bold text-sm">Rp{totalExpense.toLocaleString()}</p></div>
+              <div className="bg-[#C5A059]/10 p-4 rounded-xl text-center"><p className="text-[9px] uppercase font-bold text-[#C5A059]">Laba</p><p className="font-bold text-sm">Rp{(totalIncome - totalExpense).toLocaleString()}</p></div>
             </div>
+            <button onClick={() => setIsAddTransactionModalOpen(true)} className="bg-[#2A1E17] text-white w-full py-3 rounded-xl text-xs font-bold uppercase">Tambah Transaksi</button>
+            {transactions.map(t => (
+               <div key={t.id} className="flex justify-between items-center p-4 bg-white border rounded-xl">
+                 <p className="text-xs font-bold">{t.description}</p>
+                 <span className={`text-xs font-bold ${t.type === 'income' ? 'text-emerald-600' : 'text-red-600'}`}>{t.type === 'income' ? '+' : '-'}Rp{t.amount.toLocaleString()}</span>
+               </div>
+            ))}
           </div>
         )}
       </main>
       
-      {/* Modals here... */}
+      {isAddBookingModalOpen && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4">
+           <form onSubmit={handleAddBooking} className="bg-white p-6 rounded-2xl w-full max-w-sm space-y-3">
+              <h2 className="font-bold mb-4">Tambah Klien</h2>
+              <input required placeholder="Nama" className="w-full border p-2 rounded" onChange={e => setNewBooking({...newBooking, name: e.target.value})}/>
+              <input required placeholder="WA" className="w-full border p-2 rounded" onChange={e => setNewBooking({...newBooking, phone: e.target.value})}/>
+              <input required type="date" className="w-full border p-2 rounded" onChange={e => setNewBooking({...newBooking, date: e.target.value})}/>
+              <button className="w-full bg-primary text-white py-2 rounded">Simpan</button>
+           </form>
+        </div>
+      )}
     </div>
   );
 }
