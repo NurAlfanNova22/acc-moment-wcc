@@ -41,12 +41,12 @@ export default function Footer() {
             <div>
               <p className="text-sm font-bold uppercase tracking-widest text-text-dark">Hubungi Kami</p>
               <a
-                href="https://wa.me/6281234567890"
+                href="https://wa.me/6282245294775"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="mt-1 block text-sm text-primary font-bold hover:underline"
+                className="mt-2 block w-full sm:w-auto py-3 px-6 bg-primary rounded-xl text-xs font-bold text-white text-center hover:bg-secondary transition-all"
               >
-                WA: 0812-3456-7890
+                Hubungi Kami di WhatsApp
               </a>
               <p className="mt-1 text-xs text-text-light">
                 Tulungagung, Jawa Timur

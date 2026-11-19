@@ -67,7 +67,7 @@ export default function Navbar() {
           <div className="flex flex-1 items-center justify-end lg:flex-none">
             <div className="hidden lg:flex items-center gap-6">
                <Link href="/client/login" className="text-[11px] font-bold tracking-widest text-text-dark uppercase hover:text-primary transition-colors">Portal Klien</Link>
-               <a href="https://wa.me/6281234567890" target="_blank" rel="noopener noreferrer" className="flex h-11 items-center gap-2 rounded-lg bg-primary px-6 text-[11px] font-bold tracking-widest text-white shadow-lg shadow-primary/20 hover:bg-secondary transition-all">
+               <a href="https://wa.me/6282245294775" target="_blank" rel="noopener noreferrer" className="flex h-11 items-center gap-2 rounded-lg bg-primary px-6 text-[11px] font-bold tracking-widest text-white shadow-lg shadow-primary/20 hover:bg-secondary transition-all">
                 <Phone size={14} /> CONTACT
               </a>
             </div>
@@ -88,7 +88,7 @@ export default function Navbar() {
             ))}
             <div className="pt-4 mt-2 border-t border-border flex flex-col gap-3">
                <Link href="/client/login" onClick={() => setIsOpen(false)} className="flex h-12 items-center justify-center rounded-xl border border-border bg-warm-white text-[10px] font-bold uppercase tracking-widest text-text-dark">Akses Portal Klien</Link>
-               <a href="https://wa.me/6281234567890" className="flex h-12 items-center justify-center gap-2 rounded-xl bg-primary text-[10px] font-bold uppercase tracking-[0.2em] text-white shadow-lg shadow-primary/20 active:scale-95">
+               <a href="https://wa.me/6282245294775" className="flex h-12 items-center justify-center gap-2 rounded-xl bg-primary text-[10px] font-bold uppercase tracking-[0.2em] text-white shadow-lg shadow-primary/20 active:scale-95">
                 <Phone size={14} /> Hubungi WhatsApp
               </a>
             </div>

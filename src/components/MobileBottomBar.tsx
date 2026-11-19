@@ -10,7 +10,7 @@ export default function MobileBottomBar() {
     >
       <div className="mx-auto flex max-w-md items-center gap-2.5">
         <a
-          href="https://wa.me/6281234567890?text=Halo%20ACC%20Moment,%20saya%20mau%20tanya%20info%20paket%20wedding%20content"
+          href="https://wa.me/6282245294775?text=Halo%20ACC%20Moment,%20saya%20mau%20tanya%20info%20paket%20wedding%20content"
           target="_blank"
           rel="noopener noreferrer"
           className="flex flex-1 items-center justify-center gap-2 rounded-lg border border-border bg-cream px-3 py-3 text-xs font-semibold text-text-dark transition-colors active:bg-primary-pale min-h-[44px]"

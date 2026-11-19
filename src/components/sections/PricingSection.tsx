@@ -185,10 +185,12 @@ export default function PricingSection() {
               </div>
 
               <a
-                href={`https://wa.me/6281234567890?text=Halo%20ACC%20Moment,%20saya%20ingin%20booking%20${pkg.name}`}
-                className="mt-10 flex h-14 w-full items-center justify-center gap-3 rounded-[1.5rem] bg-[#2A1E17] text-white text-[11px] font-bold uppercase tracking-[0.2em] shadow-xl shadow-black/10 transition-all hover:bg-black active:scale-95 group"
+                href={`https://wa.me/6282245294775?text=Halo%20ACC%20Moment,%20saya%20tertarik%20dengan%20${pkg.name}.%20Bisa%20minta%20info%20ketersediaan%20tanggal%20untuk%20acara%20saya?`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-10 flex h-14 w-full items-center justify-center gap-3 rounded-[1.5rem] bg-[#2A1E17] text-white text-[11px] font-bold uppercase tracking-[0.2em] shadow-xl transition-all hover:bg-black active:scale-95 group"
               >
-                <MessageCircle size={18} className="group-hover:scale-110 transition-transform" />
+                <MessageCircle size={18} />
                 Booking Paket
               </a>
             </div>
