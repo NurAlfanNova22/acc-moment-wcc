@@ -236,13 +236,12 @@ export default function ClientDashboardPage() {
                        />
                     </div>
                     <div className="space-y-3">
-                       <p className="text-[10px] font-bold text-[#8E7F75] uppercase ml-1">List 3 Lagu untuk Story:</p>
+                       <p className="text-[10px] font-bold text-[#8E7F75] uppercase ml-1">List Lagu untuk Story:</p>
                        {requestData.storySongs.map((song, i) => (
-                         <div key={i} className="relative">
-                           <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[10px] font-bold text-[#C5A059]">{i+1}.</span>
+                         <div key={i} className="flex gap-2">
                            <input 
                              placeholder={`Judul Lagu ${i+1}`}
-                             className="w-full h-12 bg-[#FDFBF0] border border-[#D4C3A3]/50 rounded-xl pl-10 pr-5 text-xs outline-none focus:border-[#C5A059]"
+                             className="flex-1 h-12 bg-[#FDFBF0] border border-[#D4C3A3]/50 rounded-xl px-5 text-xs outline-none focus:border-[#C5A059]"
                              value={song}
                              onChange={(e) => {
                                const newSongs = [...requestData.storySongs];
@@ -250,8 +249,24 @@ export default function ClientDashboardPage() {
                                setRequestData({...requestData, storySongs: newSongs});
                              }}
                            />
+                           {requestData.storySongs.length > 1 && (
+                             <button 
+                               type="button" 
+                               onClick={() => setRequestData({...requestData, storySongs: requestData.storySongs.filter((_, index) => index !== i)})}
+                               className="h-12 w-12 flex items-center justify-center bg-red-50 text-red-500 rounded-xl border border-red-100"
+                             >
+                               <X size={16} />
+                             </button>
+                           )}
                          </div>
                        ))}
+                       <button 
+                         type="button"
+                         onClick={() => setRequestData({...requestData, storySongs: [...requestData.storySongs, ""]})}
+                         className="w-full h-10 border-2 border-dashed border-[#D4C3A3] rounded-xl text-[9px] font-bold uppercase text-[#8E7F75] hover:border-[#C5A059] hover:text-[#C5A059] transition-all"
+                       >
+                         + Tambah Lagu Lagi
+                       </button>
                     </div>
                   </div>
                 </div>
@@ -264,18 +279,35 @@ export default function ClientDashboardPage() {
                   </label>
                   <div className="space-y-3">
                     {requestData.tiktokRefs.map((ref, i) => (
-                      <input 
-                        key={i}
-                        placeholder={`Masukkan link video TikTok referensi ${i+1}...`}
-                        className="w-full h-12 bg-[#FDFBF0] border border-[#D4C3A3]/50 rounded-xl px-5 text-xs outline-none focus:border-[#C5A059]"
-                        value={ref}
-                        onChange={(e) => {
-                          const newRefs = [...requestData.tiktokRefs];
-                          newRefs[i] = e.target.value;
-                          setRequestData({...requestData, tiktokRefs: newRefs});
-                        }}
-                      />
+                      <div key={i} className="flex gap-2">
+                        <input 
+                          placeholder={`Masukkan link video TikTok referensi ${i+1}...`}
+                          className="flex-1 h-12 bg-[#FDFBF0] border border-[#D4C3A3]/50 rounded-xl px-5 text-xs outline-none focus:border-[#C5A059]"
+                          value={ref}
+                          onChange={(e) => {
+                            const newRefs = [...requestData.tiktokRefs];
+                            newRefs[i] = e.target.value;
+                            setRequestData({...requestData, tiktokRefs: newRefs});
+                          }}
+                        />
+                        {requestData.tiktokRefs.length > 1 && (
+                          <button 
+                            type="button" 
+                            onClick={() => setRequestData({...requestData, tiktokRefs: requestData.tiktokRefs.filter((_, index) => index !== i)})}
+                            className="h-12 w-12 flex items-center justify-center bg-red-50 text-red-500 rounded-xl border border-red-100"
+                          >
+                            <X size={16} />
+                          </button>
+                        )}
+                      </div>
                     ))}
+                    <button 
+                       type="button"
+                       onClick={() => setRequestData({...requestData, tiktokRefs: [...requestData.tiktokRefs, ""]})}
+                       className="w-full h-10 border-2 border-dashed border-[#D4C3A3] rounded-xl text-[9px] font-bold uppercase text-[#8E7F75] hover:border-[#C5A059] hover:text-[#C5A059] transition-all"
+                    >
+                      + Tambah Referensi TikTok
+                    </button>
                   </div>
                 </div>
 
@@ -287,18 +319,35 @@ export default function ClientDashboardPage() {
                   </label>
                   <div className="space-y-3">
                     {requestData.mandatoryMoments.map((mom, i) => (
-                      <input 
-                        key={i}
-                        placeholder={`Contoh: Salaman dengan Nenek / Teman SMA (List ${i+1})`}
-                        className="w-full h-12 bg-[#FDFBF0] border border-[#D4C3A3]/50 rounded-xl px-5 text-xs outline-none focus:border-[#C5A059]"
-                        value={mom}
-                        onChange={(e) => {
-                          const newMoms = [...requestData.mandatoryMoments];
-                          newMoms[i] = e.target.value;
-                          setRequestData({...requestData, mandatoryMoments: newMoms});
-                        }}
-                      />
+                      <div key={i} className="flex gap-2">
+                        <input 
+                          placeholder={`Contoh: Salaman dengan Nenek / Teman SMA (List ${i+1})`}
+                          className="flex-1 h-12 bg-[#FDFBF0] border border-[#D4C3A3]/50 rounded-xl px-5 text-xs outline-none focus:border-[#C5A059]"
+                          value={mom}
+                          onChange={(e) => {
+                            const newMoms = [...requestData.mandatoryMoments];
+                            newMoms[i] = e.target.value;
+                            setRequestData({...requestData, mandatoryMoments: newMoms});
+                          }}
+                        />
+                        {requestData.mandatoryMoments.length > 1 && (
+                          <button 
+                            type="button" 
+                            onClick={() => setRequestData({...requestData, mandatoryMoments: requestData.mandatoryMoments.filter((_, index) => index !== i)})}
+                            className="h-12 w-12 flex items-center justify-center bg-red-50 text-red-500 rounded-xl border border-red-100"
+                          >
+                            <X size={16} />
+                          </button>
+                        )}
+                      </div>
                     ))}
+                    <button 
+                       type="button"
+                       onClick={() => setRequestData({...requestData, mandatoryMoments: [...requestData.mandatoryMoments, ""]})}
+                       className="w-full h-10 border-2 border-dashed border-[#D4C3A3] rounded-xl text-[9px] font-bold uppercase text-[#8E7F75] hover:border-[#C5A059] hover:text-[#C5A059] transition-all"
+                    >
+                      + Tambah Momen Wajib
+                    </button>
                   </div>
                 </div>
 
