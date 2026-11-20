@@ -24,6 +24,11 @@ create index if not exists bookings_event_date_idx on public.bookings (event_dat
 create table if not exists public.team_members (
   id uuid primary key default gen_random_uuid(),
   name text not null unique,
+  phone text,
+  email text,
+  role text,
+  photo_url text,
+  notes text,
   created_at timestamptz not null default now()
 );
 
