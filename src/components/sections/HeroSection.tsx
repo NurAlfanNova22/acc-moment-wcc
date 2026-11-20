@@ -50,21 +50,16 @@ export default function HeroSection() {
 
         {/* Video / Visual Showreel Preview */}
         <div className="order-2 flex justify-center">
-          <div className="relative aspect-[9/14] w-full max-w-[280px] sm:max-w-xs overflow-hidden rounded-2xl bg-primary-pale/60 ring-1 ring-border shadow-md">
-            <div className="flex h-full flex-col items-center justify-center p-6 text-center">
-              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary text-white shadow-lg transition-transform active:scale-95">
-                <Play size={28} className="translate-x-0.5" aria-hidden="true" />
-              </div>
-              <p className="mt-5 font-heading text-base font-bold text-text-dark">
-                Highlight Showreel WCC
-              </p>
-              <p className="mt-1 text-xs text-text-light">
-                Sentuh untuk memutar contoh video TikTok / Instagram Reels
-              </p>
-              <span className="mt-4 inline-block rounded-full bg-warm-white px-3 py-1 font-mono text-[11px] font-medium text-primary border border-border">
-                Format 9:16 Vertikal
-              </span>
-            </div>
+          <div className="relative aspect-[9/14] w-full max-w-[280px] overflow-hidden rounded-2xl bg-black ring-1 ring-border shadow-md sm:max-w-xs">
+            <iframe
+              title="Video highlight ACC Moment di TikTok"
+              src="https://www.tiktok.com/player/v1/7708950246709103880?description=0&music_info=0"
+              className="absolute inset-0 h-full w-full border-0"
+              allow="encrypted-media; picture-in-picture"
+              allowFullScreen
+              loading="lazy"
+              referrerPolicy="strict-origin-when-cross-origin"
+            />
           </div>
         </div>
       </div>
