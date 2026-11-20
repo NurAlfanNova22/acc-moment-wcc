@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
@@ -13,29 +13,31 @@ export default function ClientLoginPage() {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  // Sync data dari admin di localStorage
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setIsLoading(true);
 
-    setTimeout(() => {
-      // Ambil data bookings dari localStorage (Database bayangan)
-      const savedBookings = localStorage.getItem("acc_bookings");
-      const bookings = savedBookings ? JSON.parse(savedBookings) : [];
-      
-      // Cari klien yang cocok
-      const client = bookings.find((b: any) => b.code === bookingCode && b.pin === pin);
+    try {
+      const response = await fetch("/api/client/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: bookingCode, pin }),
+      });
+      const result = await response.json();
 
-      if (client) {
-        // Simpan sesi login klien
-        sessionStorage.setItem("clientSession", JSON.stringify(client));
-        router.push("/client/dashboard");
-      } else {
-        setError("KODE BOOKING ATAU PIN SALAH. MOHON PERIKSA KEMBALI.");
-        setIsLoading(false);
+      if (!response.ok) {
+        setError(result.error || "KODE BOOKING ATAU PIN SALAH. MOHON PERIKSA KEMBALI.");
+        return;
       }
-    }, 1000);
+
+      router.replace("/client/dashboard");
+      router.refresh();
+    } catch {
+      setError("Tidak dapat menghubungi server. Coba lagi.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -111,12 +113,6 @@ export default function ClientLoginPage() {
           </form>
 
           <div className="mt-12 pt-8 border-t border-[#FDFBF0] text-center space-y-5">
-             <div className="bg-[#FDFBF0] p-4 rounded-2xl border border-[#D4C3A3]/40 text-center space-y-1">
-                <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-[#C5A059]">Akun Demo Klien</p>
-                <p className="text-xs font-mono font-bold text-[#2A1E17]">Kode: ACC-20261225-888</p>
-                <p className="text-xs font-mono font-bold text-[#2A1E17]">PIN: 1234</p>
-             </div>
-
              <Link href="/" className="inline-flex items-center justify-center w-full h-14 gap-3 bg-[#FDFBF0] rounded-2xl text-[10px] font-bold uppercase tracking-[0.2em] text-[#2A1E17] hover:bg-[#D4C3A3]/20 transition-all group">
                <Home size={16} /> Kembali ke Beranda
              </Link>
