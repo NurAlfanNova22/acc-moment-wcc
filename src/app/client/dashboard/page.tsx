@@ -24,12 +24,35 @@ import {
 } from "lucide-react";
 
 type RequestData = {
+  igUsername: string;
+  vendorList: {
+    dekor: string;
+    makeup: string;
+    fg: string;
+    vg: string;
+    mahar: string;
+    henna: string;
+    others: string;
+  };
+  customVendors: { id: string; label: string; value: string }[];
   gmaps: string;
   songRecap: string;
   storySongs: string[];
   tiktokRefs: string[];
   mandatoryMoments: string[];
   specialNote: string;
+};
+
+const EMPTY_REQUEST_DATA: RequestData = {
+  igUsername: "",
+  vendorList: { dekor: "", makeup: "", fg: "", vg: "", mahar: "", henna: "", others: "" },
+  customVendors: [],
+  gmaps: "",
+  songRecap: "",
+  storySongs: [""],
+  tiktokRefs: [""],
+  mandatoryMoments: [""],
+  specialNote: "",
 };
 
 type ClientData = {
@@ -55,14 +78,7 @@ export default function ClientDashboardPage() {
   const [clientData, setClientData] = useState<ClientData | null>(null);
 
   // Form States
-  const [requestData, setRequestData] = useState<RequestData>({
-    gmaps: "",
-    songRecap: "",
-    storySongs: [""],
-    tiktokRefs: [""],
-    mandatoryMoments: [""],
-    specialNote: ""
-  });
+  const [requestData, setRequestData] = useState<RequestData>(EMPTY_REQUEST_DATA);
 
   const [rating, setRating] = useState(5);
   const [testimoni, setTestimoni] = useState("");
@@ -82,7 +98,17 @@ export default function ClientDashboardPage() {
         if (active) {
           const data = result as ClientData;
           setClientData(data);
-          if (data.requestDetail) setRequestData(data.requestDetail);
+          if (data.requestDetail) {
+            setRequestData({
+              ...EMPTY_REQUEST_DATA,
+              ...data.requestDetail,
+              vendorList: {
+                ...EMPTY_REQUEST_DATA.vendorList,
+                ...data.requestDetail.vendorList,
+              },
+              customVendors: data.requestDetail.customVendors ?? [],
+            });
+          }
           if (data.rating) setRating(data.rating);
           if (data.reviewComment) setTestimoni(data.reviewComment);
         }
@@ -233,6 +259,29 @@ export default function ClientDashboardPage() {
                     </p>
                   </div>
                 </div>
+
+                {clientData.remainingBill > 0 && (
+                  <div className="mt-10 border-t border-[#FDFBF0] pt-8">
+                    <p className="mb-6 text-center text-[10px] font-bold uppercase tracking-widest text-[#8E7F75]">
+                      Pembayaran via QRIS
+                    </p>
+                    <div className="relative mx-auto h-64 w-64 overflow-hidden rounded-2xl border-2 border-[#D4C3A3] shadow-md">
+                      <Image src="/qris.jpg" alt="QRIS pembayaran ACC Moment" fill className="object-cover" />
+                    </div>
+                    <div className="mt-6 flex justify-center">
+                      <a
+                        href="/qris.jpg"
+                        download="QRIS_AccMoment.jpg"
+                        className="rounded-xl bg-[#2A1E17] px-6 py-3 text-[10px] font-bold uppercase tracking-widest text-white transition-all hover:bg-[#C5A059]"
+                      >
+                        Download QRIS
+                      </a>
+                    </div>
+                    <p className="mt-4 text-center text-[9px] italic text-[#8E7F75]">
+                      Mohon lampirkan bukti transfer di WhatsApp setelah scan.
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -268,6 +317,84 @@ export default function ClientDashboardPage() {
              </div>
 
              <div className="space-y-10">
+                <div className="space-y-4">
+                  <label className="flex items-center gap-3 text-xs font-bold uppercase tracking-widest text-[#2A1E17]">
+                    <Sparkles size={18} className="text-[#C5A059]" /> Instagram User
+                  </label>
+                  <input
+                    required
+                    placeholder="@username"
+                    className="h-14 w-full rounded-2xl border border-[#D4C3A3]/50 bg-[#FDFBF0] px-6 text-xs font-medium outline-none transition-all focus:border-[#C5A059]"
+                    value={requestData.igUsername}
+                    onChange={event => setRequestData({ ...requestData, igUsername: event.target.value })}
+                  />
+                </div>
+
+                <div className="space-y-6 border-t border-[#FDFBF0] pt-6">
+                  <label className="flex items-center gap-3 text-xs font-bold uppercase tracking-widest text-[#2A1E17]">
+                    <ClipboardList size={18} className="text-[#C5A059]" /> List Vendor Acara
+                  </label>
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    {[
+                      { key: "dekor", label: "Dekorasi" },
+                      { key: "makeup", label: "Make Up" },
+                      { key: "fg", label: "Fotografer" },
+                      { key: "vg", label: "Videografer" },
+                      { key: "mahar", label: "Mahar/Seserahan" },
+                      { key: "henna", label: "Henna" },
+                      { key: "others", label: "Lainnya" },
+                    ].map(vendor => (
+                      <div key={vendor.key} className="space-y-1">
+                        <label className="ml-1 text-[9px] font-bold uppercase text-[#8E7F75]">{vendor.label}</label>
+                        <input
+                          className="h-12 w-full rounded-xl border border-[#D4C3A3]/50 bg-[#FDFBF0] px-4 text-xs outline-none focus:border-[#C5A059]"
+                          value={requestData.vendorList[vendor.key as keyof RequestData["vendorList"]]}
+                          onChange={event => setRequestData({
+                            ...requestData,
+                            vendorList: { ...requestData.vendorList, [vendor.key]: event.target.value },
+                          })}
+                        />
+                      </div>
+                    ))}
+                    {requestData.customVendors.map((vendor, index) => (
+                      <div key={vendor.id} className="space-y-1">
+                        <input
+                          className="h-8 w-full border-b border-[#D4C3A3] bg-transparent text-[9px] font-bold uppercase text-[#8E7F75] outline-none"
+                          placeholder="Nama Vendor Custom"
+                          value={vendor.label}
+                          onChange={event => setRequestData({
+                            ...requestData,
+                            customVendors: requestData.customVendors.map((item, itemIndex) =>
+                              itemIndex === index ? { ...item, label: event.target.value } : item,
+                            ),
+                          })}
+                        />
+                        <input
+                          className="h-12 w-full rounded-xl border border-[#D4C3A3]/50 bg-[#FDFBF0] px-4 text-xs outline-none focus:border-[#C5A059]"
+                          placeholder="Nama vendor"
+                          value={vendor.value}
+                          onChange={event => setRequestData({
+                            ...requestData,
+                            customVendors: requestData.customVendors.map((item, itemIndex) =>
+                              itemIndex === index ? { ...item, value: event.target.value } : item,
+                            ),
+                          })}
+                        />
+                      </div>
+                    ))}
+                    <button
+                      type="button"
+                      onClick={() => setRequestData({
+                        ...requestData,
+                        customVendors: [...requestData.customVendors, { id: crypto.randomUUID(), label: "", value: "" }],
+                      })}
+                      className="col-span-full h-12 rounded-xl border-2 border-dashed border-[#D4C3A3] text-[10px] font-bold uppercase text-[#C5A059] hover:bg-[#FDFBF0]"
+                    >
+                      + Tambah Vendor Lain
+                    </button>
+                  </div>
+                </div>
+
                 <div className="space-y-4">
                   <label className="flex items-center gap-3 text-xs font-bold uppercase tracking-widest text-[#2A1E17]">
                     <MapPin size={18} className="text-[#C5A059]" /> Lokasi & Map
